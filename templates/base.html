@@ -5,8 +5,14 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>@title</title>
-	<link rel="stylesheet" href="/app.css">
+	<!-- CodeMirror's own stylesheet comes first on purpose. app.css recolours
+	     the editor from the theme variables, and several of those rules have
+	     the same specificity as CodeMirror's defaults (`.CodeMirror`,
+	     `.CodeMirror-gutters`), so whichever sheet is linked last wins. With
+	     this order the recolouring wins, which is what makes the code panel
+	     follow the light and dark themes. -->
 	<link rel="stylesheet" href="/codemirror/lib/codemirror.css">
+	<link rel="stylesheet" href="/app.css">
 	<link rel="icon" href="/favicon.png" type="image/png" sizes="32x32">
 </head>
 

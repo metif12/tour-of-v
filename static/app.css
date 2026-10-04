@@ -261,6 +261,13 @@ code {
 	height: 100%;
 	display: grid;
 	grid-template-columns: 1fr 6px 1fr;
+	/* An explicit row is what keeps the code pane the height of the window.
+	   With only an implicit row, the row is sized by its content, so a long
+	   program made CodeMirror taller than the pane, the pane grew past the
+	   bottom of the window, and the file menu carrying the Run button was
+	   pushed out of the viewport and clipped by #content. minmax(0, 1fr)
+	   refuses to grow past the container. */
+	grid-template-rows: minmax(0, 1fr);
 }
 
 .prose-pane {
@@ -356,6 +363,11 @@ code {
 	display: flex;
 	flex-direction: column;
 	min-width: 0;
+	/* min-height: 0 lets the flex children shrink below their content size.
+	   Without it the automatic minimum size of a flex item is its content, so
+	   a long program could not be scrolled inside the editor: the editor grew
+	   instead, and pushed the Run button below the fold. */
+	min-height: 0;
 	border-left: 1px solid var(--border);
 	background: var(--bg-raised);
 }
