@@ -1,0 +1,628 @@
+/* Tour of V styles.
+ *
+ * Two themes driven entirely by custom properties, so the theme toggle only
+ * has to change one attribute on <html>. Colours are chosen to stay legible
+ * in both, and to keep the editor's syntax colours readable against the
+ * editor's own background rather than the page's.
+ */
+
+:root {
+	--sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	--mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+	--bar-h: 48px;
+	--radius: 6px;
+}
+
+html[data-theme="light"] {
+	--bg: #ffffff;
+	--bg-sunken: #f6f7f9;
+	--bg-raised: #ffffff;
+	--fg: #1b1d21;
+	--fg-muted: #5c6370;
+	--fg-faint: #858c99;
+	--border: #dfe2e8;
+	--border-strong: #c3c8d2;
+	--accent: #0b6fb8;
+	--accent-fg: #ffffff;
+	--danger-bg: #ffe8e8;
+	--danger-fg: #a32020;
+	--danger-border: #f0a9a9;
+	--stderr: #a32020;
+
+	--cm-gutter-bg: #f6f7f9;
+	--cm-gutter-fg: #a5acb8;
+	--cm-active-gutter: #4a5160;
+	--cm-cursor: #1b1d21;
+	--cm-selection: #d5e6f7;
+	--cm-matching: #e8eef5;
+	--cm-atom: #a3205a;
+	--cm-number: #a35200;
+	--cm-keyword: #7b1fa2;
+	--cm-type: #0b6fb8;
+	--cm-builtin: #00695c;
+	--cm-string: #1c6b3c;
+	--cm-comment: #8a919e;
+	--cm-variable-2: #0b5c8a;
+	--cm-error-bg: #ffd9d9;
+	--cm-error-gutter: #c62828;
+}
+
+html[data-theme="dark"] {
+	--bg: #14161a;
+	--bg-sunken: #1b1e24;
+	--bg-raised: #21252c;
+	--fg: #e6e8ec;
+	--fg-muted: #a3abb8;
+	--fg-faint: #79818f;
+	--border: #2c313a;
+	--border-strong: #3d444f;
+	--accent: #58a6ff;
+	--accent-fg: #0b1220;
+	--danger-bg: #3a1f22;
+	--danger-fg: #ff9d9d;
+	--danger-border: #6b3336;
+	--stderr: #ff9d9d;
+
+	--cm-gutter-bg: #1b1e24;
+	--cm-gutter-fg: #6b7280;
+	--cm-active-gutter: #c3c9d4;
+	--cm-cursor: #e6e8ec;
+	--cm-selection: #2d4a63;
+	--cm-matching: #2a2f38;
+	--cm-atom: #ff8fb1;
+	--cm-number: #ffb570;
+	--cm-keyword: #d2a8ff;
+	--cm-type: #79c0ff;
+	--cm-builtin: #7ee2b8;
+	--cm-string: #a5d6a7;
+	--cm-comment: #7d8592;
+	--cm-variable-2: #a5d8ff;
+	--cm-error-bg: #4a2226;
+	--cm-error-gutter: #ff8a8a;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+
+body {
+	font-family: var(--sans);
+	font-size: 16px;
+	line-height: 1.6;
+	color: var(--fg);
+	background: var(--bg);
+	display: flex;
+	flex-direction: column;
+}
+
+body.dragging {
+	cursor: col-resize;
+	user-select: none;
+}
+
+a {
+	color: var(--accent);
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+code {
+	font-family: var(--mono);
+	font-size: 0.9em;
+}
+
+/* ------------------------------------------------------------------ top bar */
+
+.top-bar {
+	height: var(--bar-h);
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 12px;
+	background: var(--bg-raised);
+	border-bottom: 1px solid var(--border);
+}
+
+.logo-link {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--fg);
+	font-weight: 600;
+	font-size: 15px;
+}
+
+.logo-link:hover {
+	text-decoration: none;
+}
+
+.right {
+	display: flex;
+	gap: 4px;
+}
+
+.bar-button {
+	appearance: none;
+	background: none;
+	border: 0;
+	color: var(--fg-muted);
+	cursor: pointer;
+	padding: 6px;
+	border-radius: var(--radius);
+	display: flex;
+	align-items: center;
+}
+
+.bar-button:hover {
+	background: var(--bg-sunken);
+	color: var(--fg);
+}
+
+/* ----------------------------------------------------------------- toc drawer */
+
+.toc {
+	position: fixed;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	width: 340px;
+	max-width: 85vw;
+	background: var(--bg-raised);
+	border-right: 1px solid var(--border);
+	overflow-y: auto;
+	padding: 16px;
+	z-index: 40;
+	box-shadow: 2px 0 16px rgba(0, 0, 0, 0.12);
+}
+
+.toc[hidden] {
+	display: none;
+}
+
+.toc-module {
+	margin-bottom: 22px;
+}
+
+.toc-module h2 {
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--fg-faint);
+	margin: 0 0 6px;
+}
+
+.toc-desc {
+	font-size: 13px;
+	color: var(--fg-muted);
+	margin: 0 0 10px;
+}
+
+.toc-lesson {
+	margin-bottom: 6px;
+}
+
+.toc-lesson summary {
+	cursor: pointer;
+	list-style: none;
+	padding: 4px 0;
+}
+
+.toc-lesson summary::-webkit-details-marker {
+	display: none;
+}
+
+.toc-lesson summary a {
+	color: var(--fg);
+	font-weight: 500;
+}
+
+.toc-lesson ol {
+	margin: 4px 0 8px;
+	padding-left: 18px;
+}
+
+.toc-lesson li {
+	margin: 2px 0;
+	font-size: 14px;
+}
+
+.click-catcher {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.3);
+	z-index: 30;
+}
+
+.click-catcher[hidden] {
+	display: none;
+}
+
+/* -------------------------------------------------------------------- lesson */
+
+#content {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.lesson {
+	height: 100%;
+	display: grid;
+	grid-template-columns: 1fr 6px 1fr;
+}
+
+.prose-pane {
+	overflow-y: auto;
+	padding: 28px 32px 80px;
+	min-width: 0;
+}
+
+.slide-content {
+	max-width: 42em;
+}
+
+.slide-content h2 {
+	margin-top: 0;
+	font-size: 26px;
+	line-height: 1.25;
+}
+
+.slide-content p {
+	margin: 0 0 14px;
+}
+
+.slide-content pre {
+	background: var(--bg-sunken);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	padding: 12px 14px;
+	overflow-x: auto;
+}
+
+.slide-content pre code {
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.slide-content code {
+	background: var(--bg-sunken);
+	border-radius: 3px;
+	padding: 1px 4px;
+}
+
+.slide-content pre code {
+	background: none;
+	padding: 0;
+}
+
+.slide-content ul {
+	margin: 0 0 14px;
+	padding-left: 22px;
+}
+
+/* pager */
+
+.pager {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	margin-top: 36px;
+	padding-top: 16px;
+	border-top: 1px solid var(--border);
+	font-size: 14px;
+}
+
+.pager a,
+.pager .disabled {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 34px;
+	border-radius: var(--radius);
+	border: 1px solid var(--border);
+}
+
+.pager a:hover {
+	background: var(--bg-sunken);
+	text-decoration: none;
+}
+
+.pager .disabled {
+	color: var(--fg-faint);
+	opacity: 0.5;
+}
+
+.counter {
+	color: var(--fg-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------------------------------------------- code pane */
+
+.code-pane {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	border-left: 1px solid var(--border);
+	background: var(--bg-raised);
+}
+
+.splitter {
+	cursor: col-resize;
+	background: var(--border);
+	transition: background 120ms ease;
+}
+
+.splitter:hover,
+.splitter:focus-visible {
+	background: var(--accent);
+	outline: none;
+}
+
+.file-tabs {
+	display: flex;
+	gap: 2px;
+	padding: 6px 8px 0;
+	border-bottom: 1px solid var(--border);
+	flex: 0 0 auto;
+}
+
+.file-tab {
+	font-family: var(--mono);
+	font-size: 12px;
+	padding: 5px 10px;
+	color: var(--fg-muted);
+	border: 1px solid transparent;
+	border-bottom: 0;
+	border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.file-tab.active {
+	color: var(--fg);
+	background: var(--bg-sunken);
+	border-color: var(--border);
+}
+
+.editor-wrap {
+	flex: 1 1 auto;
+	min-height: 120px;
+	overflow: hidden;
+	position: relative;
+}
+
+.editor-wrap .CodeMirror {
+	height: 100%;
+	font-family: var(--mono);
+	font-size: 13.5px;
+	line-height: 1.55;
+}
+
+.file-menu {
+	flex: 0 0 auto;
+	display: flex;
+	gap: 4px;
+	padding: 7px 8px;
+	border-top: 1px solid var(--border);
+	background: var(--bg-raised);
+}
+
+.menu-button {
+	font-size: 13px;
+	padding: 5px 12px;
+	border-radius: var(--radius);
+	border: 1px solid var(--border-strong);
+	color: var(--fg);
+	background: var(--bg-sunken);
+}
+
+.menu-button:hover {
+	border-color: var(--accent);
+	color: var(--accent);
+	text-decoration: none;
+}
+
+.output {
+	flex: 0 0 auto;
+	max-height: 32vh;
+	overflow: auto;
+	padding: 10px 12px;
+	border-top: 1px solid var(--border);
+	font-family: var(--mono);
+	font-size: 13px;
+	line-height: 1.5;
+	white-space: pre-wrap;
+	word-break: break-word;
+	background: var(--bg);
+}
+
+.output:empty {
+	display: none;
+}
+
+.out-build {
+	color: var(--fg-muted);
+}
+
+.out-stderr,
+.out-system {
+	color: var(--stderr);
+}
+
+/* --------------------------------------------------------------------- list */
+
+.list-page,
+.notfound {
+	max-width: 46em;
+	margin: 0 auto;
+	padding: 40px 28px 80px;
+}
+
+.list-page h1 {
+	font-size: 30px;
+	margin: 0 0 8px;
+}
+
+.list-lede {
+	color: var(--fg-muted);
+	font-size: 17px;
+	margin: 0 0 40px;
+}
+
+.list-module {
+	margin-bottom: 40px;
+}
+
+.list-module h2 {
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--fg-faint);
+	margin: 0 0 8px;
+}
+
+.list-desc {
+	color: var(--fg-muted);
+	margin: 0 0 16px;
+}
+
+.list-lesson {
+	margin-bottom: 20px;
+	padding-left: 14px;
+	border-left: 2px solid var(--border);
+}
+
+.list-lesson h3 {
+	margin: 0 0 2px;
+	font-size: 17px;
+}
+
+.lesson-desc {
+	color: var(--fg-muted);
+	font-size: 14px;
+	margin: 0 0 6px;
+}
+
+.lesson-pages {
+	margin: 0;
+	padding-left: 22px;
+	font-size: 14px;
+}
+
+.notfound {
+	padding-top: 80px;
+}
+
+/* ---------------------------------------------------------------- CodeMirror */
+
+.CodeMirror {
+	background: var(--bg-raised);
+	color: var(--fg);
+}
+
+.CodeMirror-gutters {
+	background: var(--cm-gutter-bg);
+	border-right: 1px solid var(--border);
+}
+
+.CodeMirror-linenumber {
+	color: var(--cm-gutter-fg);
+	padding: 0 8px 0 6px;
+}
+
+.CodeMirror-cursor {
+	border-left: 2px solid var(--cm-cursor);
+}
+
+.CodeMirror-selected {
+	background: var(--cm-selection) !important;
+}
+
+.CodeMirror-focused .CodeMirror-selected {
+	background: var(--cm-selection) !important;
+}
+
+.CodeMirror-matchingbracket {
+	background: var(--cm-matching);
+	color: inherit !important;
+	outline: 1px solid var(--border-strong);
+}
+
+.cm-s-vlang .cm-atom {
+	color: var(--cm-atom);
+}
+
+.cm-s-vlang .cm-number {
+	color: var(--cm-number);
+}
+
+.cm-s-vlang .cm-keyword {
+	color: var(--cm-keyword);
+}
+
+.cm-s-vlang .cm-type {
+	color: var(--cm-type);
+}
+
+.cm-s-vlang .cm-builtin {
+	color: var(--cm-builtin);
+}
+
+.cm-s-vlang .cm-string {
+	color: var(--cm-string);
+}
+
+.cm-s-vlang .cm-string-2 {
+	color: var(--cm-string);
+}
+
+.cm-s-vlang .cm-comment {
+	color: var(--cm-comment);
+	font-style: italic;
+}
+
+.cm-s-vlang .cm-variable-2 {
+	color: var(--cm-variable-2);
+}
+
+.cm-s-vlang .cm-operator {
+	color: var(--fg-muted);
+}
+
+.cm-error-line {
+	background: var(--cm-error-bg) !important;
+}
+
+.cm-error-line .CodeMirror-linenumber {
+	color: var(--cm-error-gutter) !important;
+	font-weight: 700;
+}
+
+/* ------------------------------------------------------------------ narrower */
+
+@media (max-width: 860px) {
+	.lesson {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto 6px 1fr;
+	}
+
+	.splitter {
+		cursor: row-resize;
+	}
+
+	.prose-pane {
+		padding: 20px 18px 40px;
+	}
+}

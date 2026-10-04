@@ -1,0 +1,53 @@
+<div class="lesson" id="lesson">
+	<div class="prose-pane" id="prose-pane">
+		<div class="slide-content">
+			@veb.raw(page_data.body)
+		</div>
+
+		<nav class="pager" aria-label="Page navigation">
+			@if has_prev
+				<a class="prev-page" rel="prev" href="/@prev_page.slug/@prev_page.number">&lt;</a>
+			@else
+				<span class="prev-page disabled">&lt;</span>
+			@end
+			<span class="counter">@ref.number / @ref.total</span>
+			@if has_next
+				<a class="next-page" rel="next" href="/@next_page.slug/@next_page.number">&gt;</a>
+			@else
+				<span class="next-page disabled">&gt;</span>
+			@end
+		</nav>
+	</div>
+
+	@if has_code
+		<div class="splitter" id="splitter" role="separator" aria-orientation="vertical"
+			tabindex="0" aria-label="Resize panes"></div>
+
+		<div class="code-pane" id="code-pane">
+			@if has_files_tabs
+				<div class="file-tabs" id="file-tabs">
+					@for f in page_data.files
+						<a class="file-tab" href="#" data-file="@f.name">@f.name</a>
+					@endfor
+				</div>
+			@end
+
+			<div class="editor-wrap" id="editor-wrap">
+				<textarea id="editor"></textarea>
+			</div>
+
+			<div class="file-menu" id="file-menu">
+				<a href="#" id="run" class="menu-button">Run</a>
+				<a href="#" id="format" class="menu-button">Format</a>
+				<a href="#" id="reset" class="menu-button">Reset</a>
+				@if has_solution
+					<a href="#" id="solution" class="menu-button">Solution</a>
+				@end
+			</div>
+
+			<div class="output" id="output"></div>
+		</div>
+	@end
+</div>
+
+<script type="application/json" id="page-data">@veb.raw(page_json)</script>

@@ -1,0 +1,32 @@
+# Normalise line endings to LF in the repository, and check them out as LF.
+#
+# This matters more than usual here for three reasons:
+#
+#   - The Docker build copies these files into a Linux image, so a working
+#     tree with CRLF would build V sources with CRLF.
+#   - Code examples are embedded byte for byte into the binary, and the editor
+#     marks the line the compiler complained about. Keeping the bytes stable
+#     between what is committed and what is served is the point.
+#   - Windows and Linux contributors should produce the same commit.
+
+* text=auto eol=lf
+
+# Binary assets, never touched.
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# V sources and templates: LF, and treated as text so git will not try to be
+# clever about them.
+*.v text eol=lf
+*.vsh text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+Dockerfile text eol=lf
+.gitignore text eol=lf

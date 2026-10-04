@@ -1,0 +1,18 @@
+# build artefacts
+*.exe
+*.out
+*.tmp.c
+tour_of_v
+bin/
+
+# runtime state (sandbox scratch, shares db, logs)
+/run/
+*.db
+*.db-journal
+logs/
+
+# editors
+.idea/
+.vscode/
+*.swp
+.DS_Store

@@ -1,0 +1,53 @@
+# The tour runs code submitted by anyone who visits it, so this container is
+# part of the security boundary.
+#
+# `privileged: true` is not an oversight and must not be removed casually: the
+# sandbox works by creating Linux namespaces and cgroups, which an unprivileged
+# container cannot do. The privilege the container holds is spent on creating
+# the namespace that then takes it away again. That is the whole design, and
+# it is the same design the official V playground at play.vlang.io uses.
+#
+# Two consequences worth stating plainly:
+#
+#   - Do not put anything you care about in this container. It has no
+#     credentials and no volumes holding real data.
+#   - Do not run it on a host where a compromise would matter. A sandbox escape
+#     is a container compromise, and the container is privileged.
+#
+# Note that the container itself has a network, because it has to serve HTTP.
+# That is not a gap: isolate gives every sandbox box its own empty network
+# namespace, so a submitted program can create a socket but has nowhere to
+# connect. The startup self-test verifies that rather than assuming it.
+
+services:
+  tour:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    privileged: true
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      # isolate needs writable scratch in four places. The root filesystem is
+      # read only so that a sandbox escape cannot reach anything, and each of
+      # these is the only writable path given.
+      - /tmp
+      # isolate's runtime state (PIDs, file descriptor bookkeeping).
+      - /run/isolate
+      # The sandbox boxes themselves, and their temporary area.
+      - /var/local/lib/isolate
+      - /var/local/lib/isolate-tmp
+    environment:
+      # Explicit, so the runner bind mounts a known directory rather than
+      # whatever the base image happened to use.
+      TOUR_VROOT: /opt/vlang
+    healthcheck:
+      # Re-verifies containment periodically. The self-test is cheap next to
+      # the cost of discovering the sandbox stopped working.
+      test: ["CMD", "/usr/local/bin/tour", "--self-test-only"]
+      interval: 5m
+      timeout: 120s
+      retries: 1
+      start_period: 30s
