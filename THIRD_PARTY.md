@@ -1,5 +1,8 @@
 # Third party code and assets
 
+The tour itself is MIT licensed, see [LICENSE](LICENSE). The items below keep
+their own licences and are used under them.
+
 ## V logo
 
 `static/logo.svg` and `static/favicon.png` are the official V logo, taken
