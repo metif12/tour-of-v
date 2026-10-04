@@ -32,16 +32,6 @@ fn stub(slug string, title string, description string, upcoming string) Module {
 	}
 }
 
-// optionresult covers V's Option and Result types in depth.
-pub fn optionresult() Module {
-	return stub('optionresult', 'Handling absence and failure.', 'V distinguishes ' +
-		'&ldquo;there is no value&rdquo; from &ldquo;this failed&rdquo;. This lesson ' +
-		'covers Option, Result, and the propagation patterns that go with them.',
-		'Planned pages: Option types, unwrapping in an if guard, Result types, ' +
-			'propagating errors with <code>?</code>, custom errors, mapping over a ' +
-			'Result, and error messages as values.')
-}
-
 // methods covers methods, interfaces and the standard library conventions
 // that V code is expected to follow.
 pub fn methods() Module {

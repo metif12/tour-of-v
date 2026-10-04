@@ -22,14 +22,14 @@ Eight lessons, in reading order:
 | `basics` — modules, variables, functions | 13 | written |
 | `controlflow` — for, if, match, defer | 10 | written |
 | `moretypes` — structs, arrays, slices, maps, strings | 8 | written |
-| `optionresult` — Option and Result in depth | — | placeholder |
+| `optionresult` — Option and Result in depth | 4 | written |
 | `methods` — methods and interfaces | — | placeholder |
 | `generics` — type parameters | — | placeholder |
 | `concurrency` — spawn, channels, lock | — | placeholder |
 
-The four unwritten lessons are listed and navigable but say plainly that they
+The three unwritten lessons are listed and navigable but say plainly that they
 are not written yet, so the shape of the finished tour is visible from the
-start. 36 pages of real content exist today, across 31 example programs.
+start. 40 pages of real content exist today, across 35 example programs.
 
 ## How it is put together
 
@@ -155,18 +155,23 @@ permits flag injection. This tour accepts none.
 
 Working and verified:
 
-- All 36 pages of content compile, and all 31 example programs compile and run
+- All 40 pages of content compile, and all 35 example programs compile and run
   with correct output and no compiler noise.
 - The server renders every lesson, the list, and real 404s for unknown lessons,
   out-of-range pages and wrong URL depth.
 - The editor, keyboard shortcuts, persistence, TOC and themes work in a browser.
-- `v test .` passes; `v fmt -w .` is clean.
+- `v test .` passes; `v fmt -w .` and `v check-md` are clean.
 
 Every claim a lesson makes about output was checked against the program's
 actual output rather than assumed. That caught several, including that
 assignment and slicing share rather than copy in this compiler, so the lessons
 teach `clone` as the explicit way to get an independent copy instead of
 asserting a rule that is version dependent.
+
+Output is stripped of ANSI escape sequences on the server before it is shown. A
+compiler error carrying a highlighted source excerpt would otherwise reach the
+browser as literal `ESC [ 3 1 m` bytes, and rendering colour from program
+output would mean inserting markup built from it.
 
 Not yet verified end to end:
 

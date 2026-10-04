@@ -1,5 +1,7 @@
 module runner
 
+import strings
+
 // Diagnostic is one compiler message, in the shape a code editor can use.
 //
 // The Go Tour marks the offending line in the editor by scraping
@@ -113,6 +115,50 @@ pub fn first_error_line(diags []Diagnostic) int {
 	return 0
 }
 
+// strip_ansi removes ANSI escape sequences from a blob of output.
+//
+// A submitted program may print coloured text, and a compiler error may carry
+// a highlighted source excerpt. Neither reads well in a plain text pane: the
+// reader would see ` [ 3 1 m` rather than a colour. Rendering colour in the
+// output pane would mean inserting markup built from program output, which is
+// not worth the risk for a tutorial, so the sequences are removed here instead.
+//
+// Only CSI sequences are handled, which covers colour, cursor movement and
+// erase. A lone ESC that is not followed by `[` is dropped, since there is
+// nothing sensible to show for it.
+pub fn strip_ansi(text string) string {
+	mut out := strings.new_builder(text.len)
+	mut i := 0
+	for i < text.len {
+		if text[i] != esc {
+			out.write_u8(text[i])
+			i++
+			continue
+		}
+		if i + 1 >= text.len || text[i + 1] != csi_intro {
+			// A trailing ESC, or one introducing something other than a CSI.
+			i++
+			continue
+		}
+		// Skip the parameter and intermediate bytes, then the final byte that
+		// ends the sequence. A CSI sequence ends at the first byte in the
+		// range `@` to `~`, so continue while the byte is outside it.
+		mut j := i + 2
+		for j < text.len && (text[j] < csi_final_first || text[j] > csi_final_last) {
+			j++
+		}
+		i = if j < text.len { j + 1 } else { j }
+	}
+	return out.str()
+}
+
+// esc, csi_intro and the CSI final byte range, spelled out rather than
+// written as escapes so the intent is readable.
+const esc = u8(27)
+const csi_intro = u8(`[`)
+const csi_final_first = u8(`@`)
+const csi_final_last = u8(`~`)
+
 // prettify bounds a captured output blob.
 //
 // Two bounds, because each catches a case the other misses: a single very
@@ -120,7 +166,7 @@ pub fn first_error_line(diags []Diagnostic) int {
 // can tell the difference between a program that printed that and a program
 // whose output was cut short.
 pub fn prettify(output string) string {
-	mut pretty := output.trim_right('\n')
+	mut pretty := strip_ansi(output).trim_right('\n')
 
 	if pretty.len > max_output_bytes {
 		pretty = pretty[..max_output_bytes - 3] + '...'

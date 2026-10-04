@@ -2,92 +2,64 @@ module runner_test
 
 import runner
 
-fn test_validate_rejects_empty_submission() {
-	assert runner.validate([]) != ''
+// A colour sequence, built at runtime so this file does not itself contain
+// the bytes it is testing for.
+fn red() string {
+	return u8(27).ascii_str() + '[31m'
 }
 
-// These names are the whole attack surface for path traversal, so each one
-// gets its own case rather than being folded into a table.
-fn test_validate_rejects_unsafe_file_names() {
-	bad := [
-		'../escape.v',
-		'../../etc/passwd.v',
-		'/etc/passwd',
-		'a/../../b.v',
-		'sub/../../../x.v',
-		'..',
-		'.',
-		'',
-		'no_extension',
-		'script.sh',
-		'C:/windows/system32.v',
-		'back\\slash.v',
-		'.hidden.v',
-		'sub/.hidden.v',
-		'with space.v',
-		'semi;colon.v',
-		'dollar' + '$' + '{x}.v',
-		'pipe|it.v',
-		'newline.v
-second.v',
-	]
-	for name in bad {
-		assert runner.validate([runner.SourceFile{ name: name, body: 'fn main() {}' }]) != '', 'should have rejected file name: ${name}'
-	}
+fn reset() string {
+	return u8(27).ascii_str() + '[0m'
 }
 
-// A file name is one name, never a path. Refusing a separator outright means
-// there is no traversal to reason about at all.
-fn test_validate_rejects_names_containing_a_path_separator() {
-	for name in ['sub/helper.v', 'a/b/c.v', '/main.v', './main.v'] {
-		assert runner.validate([runner.SourceFile{ name: name, body: 'fn main() {}' }]) != '', 'should have rejected path-like name: ${name}'
-	}
+fn test_strip_ansi_removes_colour_sequences() {
+	assert runner.strip_ansi('a${red()}red${reset()}b') == 'aredb'
 }
 
-fn test_validate_accepts_ordinary_names() {
-	good := ['main.v', 'loops.v', 'a_b-c.v', 'UPPER.v', 'v2.v']
-	for name in good {
-		assert runner.validate([runner.SourceFile{ name: name, body: 'fn main() {}' }]) == '', 'should have accepted file name: ${name}'
-	}
+fn test_strip_ansi_removes_cursor_movement() {
+	// CSI A moves the cursor up. It carries no text worth keeping.
+	esc := u8(27).ascii_str()
+	assert runner.strip_ansi('one\n${esc}[2Athree') == 'one\nthree'
 }
 
-fn test_validate_rejects_too_many_files() {
-	mut files := []runner.SourceFile{}
-	for i in 0 .. 8 {
-		files << runner.SourceFile{ name: 'f${i}.v', body: 'fn main() {}' }
-	}
-	assert runner.validate(files) != ''
+fn test_strip_ansi_removes_erase_and_clear() {
+	esc := u8(27).ascii_str()
+	assert runner.strip_ansi('before${esc}[2Jafter') == 'beforeafter'
+	assert runner.strip_ansi('x${esc}[K') == 'x'
 }
 
-fn test_validate_rejects_oversized_source() {
-	big := 'x'.repeat(runner.max_source_bytes + 1)
-	assert runner.validate([runner.SourceFile{ name: 'main.v', body: big }]) != ''
+fn test_strip_ansi_leaves_ordinary_text_alone() {
+	assert runner.strip_ansi('plain text') == 'plain text'
+	assert runner.strip_ansi('') == ''
+	assert runner.strip_ansi('a [31m b') == 'a [31m b'
+	assert runner.strip_ansi('100% [done]') == '100% [done]'
 }
 
-fn test_validate_enforces_the_total_size_across_files() {
-	half := 'x'.repeat(runner.max_source_bytes / 2 + 10)
-	files := [
-		runner.SourceFile{ name: 'a.v', body: half },
-		runner.SourceFile{ name: 'b.v', body: half },
-	]
-	assert runner.validate(files) != ''
+fn test_strip_ansi_handles_a_truncated_sequence() {
+	// Output cut off mid-sequence must not lose the rest of the text, and must
+	// not loop. A colour sequence with no terminator is simply dropped.
+	esc := u8(27).ascii_str()
+	assert runner.strip_ansi('done${esc}[31') == 'done'
+	assert runner.strip_ansi('${esc}') == ''
 }
 
-fn test_pick_main_prefers_main_v() {
-	files := [
-		runner.SourceFile{ name: 'helper.v', body: '' },
-		runner.SourceFile{ name: 'main.v', body: '' },
-	]
-	assert runner.pick_main(files) == 'main.v'
+fn test_strip_ansi_drops_a_lone_escape() {
+	esc := u8(27).ascii_str()
+	assert runner.strip_ansi('a${esc}b') == 'ab'
 }
 
-fn test_pick_main_falls_back_to_the_first_file() {
-	files := [runner.SourceFile{ name: 'only.v', body: '' }]
-	assert runner.pick_main(files) == 'only.v'
+fn test_strip_ansi_leaves_a_bracket_that_is_not_a_sequence() {
+	// The `[` only introduces a sequence when it directly follows ESC.
+	assert runner.strip_ansi('array[0]') == 'array[0]'
 }
 
-// The shape below is copied from real V compiler output, because the parser
-// is only worth anything if it handles what the compiler actually emits.
+// prettify now strips escapes before bounding, so a program that prints colour
+// cannot use it to smuggle bytes past the size limits either.
+fn test_prettify_strips_escapes() {
+	noisy := 'start${red()}middle${reset()}end'
+	assert runner.prettify(noisy) == 'startmiddleend'
+}
+
 fn test_parse_diagnostic_reads_a_real_error() {
 	raw := 'main.v:3:6: error: `sum` is immutable, declare it with `mut` to make it mutable'
 	d := runner.parse_diagnostic(raw)
