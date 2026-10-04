@@ -32,16 +32,6 @@ fn stub(slug string, title string, description string, upcoming string) Module {
 	}
 }
 
-// methods covers methods, interfaces and the standard library conventions
-// that V code is expected to follow.
-pub fn methods() Module {
-	return stub('methods', 'Methods and interfaces', 'How to define methods on ' +
-		'types, how to declare interfaces, and how the standard library expects ' +
-		'you to behave.', 'Planned pages: methods, method receivers, mutating through ' +
-		'a pointer, interfaces, implicit implementation, type embedding, embedding ' +
-		'struct fields in interfaces, and the Stringer convention.')
-}
-
 // generics covers type parameters.
 pub fn generics() Module {
 	return stub('generics', 'Generics', 'V supports generic programming using ' +

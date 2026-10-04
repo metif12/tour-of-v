@@ -187,6 +187,32 @@ fn test_the_deliberately_broken_example_is_the_only_one() {
 	assert broken == 1
 }
 
+// Page bodies are V strings, so a literal `${` in prose has to be written
+// `&#36;{`. An unescaped one is normally a compile error, but it compiles
+// happily when it names something in scope, and then the lesson silently loses
+// the text it meant to show. This is the check for that case.
+fn test_no_page_body_contains_an_unescaped_dollar_brace() {
+	t := build()
+	needle := '$' + '{'
+	for ref in t.pages {
+		assert !ref.page.body.contains(needle), 'page ${ref.lesson.slug}/${ref.number} ' +
+			'has an unescaped dollar-brace: write it as &#36;{ instead'
+	}
+}
+
+// The escaped form must survive all the way to the browser as a plain dollar
+// brace, so a lesson can show V string interpolation without losing it.
+fn test_escaped_dollar_brace_is_used_where_a_lesson_shows_interpolation() {
+	t := build()
+	mut found := false
+	for ref in t.pages {
+		if ref.page.body.contains('&#36;{') {
+			found = true
+		}
+	}
+	assert found, 'no lesson demonstrates interpolation, so the escaping is untested'
+}
+
 fn test_exercise_pages_carry_a_solution() {
 	t := build()
 	mut exercises := 0
