@@ -30,22 +30,63 @@ html[data-theme="light"] {
 	--danger-border: #f0a9a9;
 	--stderr: #a32020;
 
-	--cm-gutter-bg: #f6f7f9;
-	--cm-gutter-fg: #a5acb8;
+	--cm-gutter-bg: #ffffff;
+	--cm-gutter-fg: #aeb3c2;
 	--cm-active-gutter: #4a5160;
-	--cm-cursor: #1b1d21;
-	--cm-selection: #d5e6f7;
-	--cm-matching: #e8eef5;
-	--cm-atom: #a3205a;
-	--cm-number: #a35200;
-	--cm-keyword: #7b1fa2;
-	--cm-type: #0b6fb8;
-	--cm-builtin: #00695c;
-	--cm-string: #1c6b3c;
-	--cm-comment: #8a919e;
-	--cm-variable-2: #0b5c8a;
+	--cm-cursor: #000000;
+	--cm-selection: #9cc5ef;
+	--cm-matching: #93d9d9;
+	--cm-atom: #219999;
+	--cm-number: #1750eb;
+	--cm-keyword: #0033b3;
+	--cm-type: #000000;
+	--cm-builtin: #0033b3;
+	--cm-string: #067d17;
+	--cm-comment: #8c8c8c;
+	--cm-variable-2: #0055aa;
 	--cm-error-bg: #ffd9d9;
 	--cm-error-gutter: #c62828;
+
+	/* The Run button and its neighbours follow play.vlang.io, where Run is a
+	   filled blue pill and everything beside it is bare text until hover. */
+	--run-bg: #3474f0;
+	--run-bg-hover: #2a5ed0;
+	--run-fg: #ffffff;
+	--menu-hover: #ecedf1;
+
+	/* play.vlang.io draws the editor and its toolbar on the same grey as the
+	   page and separates them with a border, rather than raising the code area
+	   off the page. Its output terminal is plain white in light mode. */
+	--code-bg: #ffffff;
+	--code-border: #e0e0e0;
+	--code-out-bg: #ffffff;
+	--code-fg: #000000;
+
+	/* play.vlang.io separates regions with borders rather than by raising one
+	   above another, and its help affordance is a plain outlined circle. */
+	--header-bg: #ffffff;
+	--aside-bg: #f9f9f9;
+	--aside-border: #e0e0e0;
+	--help-btn-bg: #ffffff;
+	--help-btn-bg-hover: #f7f8fa;
+	--help-btn-fg: #545454;
+	--help-btn-border: #7c7c7c;
+	--help-btn-border-hover: #4f4f4f;
+	--help-panel-border: #ecedf1;
+	--help-panel-bg: #ffffff;
+	--help-panel-fg: #1b1d21;
+	--help-kbd-bg: #f7f7f7;
+	--help-kbd-fg: #000000;
+	--help-kbd-border: #cccccc;
+	--help-kbd-inset: #ffffff;
+	--semi-dark-overlay: rgba(0, 0, 0, 0.32);
+
+	/* Inline and block code in the lesson text, matched to the editor so a
+	   snippet on the page and the same snippet in the editor look related. */
+	--inline-code-bg: #f9f9f9;
+	--block-code-bg: #ffffff;
+	--block-code-border: #ecedf1;
+	--block-code-fg: #1b1d21;
 }
 
 html[data-theme="dark"] {
@@ -64,22 +105,54 @@ html[data-theme="dark"] {
 	--danger-border: #6b3336;
 	--stderr: #ff9d9d;
 
-	--cm-gutter-bg: #1b1e24;
-	--cm-gutter-fg: #6b7280;
-	--cm-active-gutter: #c3c9d4;
-	--cm-cursor: #e6e8ec;
-	--cm-selection: #2d4a63;
-	--cm-matching: #2a2f38;
-	--cm-atom: #ff8fb1;
-	--cm-number: #ffb570;
-	--cm-keyword: #d2a8ff;
-	--cm-type: #79c0ff;
-	--cm-builtin: #7ee2b8;
-	--cm-string: #a5d6a7;
-	--cm-comment: #7d8592;
-	--cm-variable-2: #a5d8ff;
+	--cm-gutter-bg: #1e1f22;
+	--cm-gutter-fg: #4f5157;
+	--cm-active-gutter: #bbbbbb;
+	--cm-cursor: #bbbbbb;
+	--cm-selection: #20407f;
+	--cm-matching: #336146;
+	--cm-atom: #cc7832;
+	--cm-number: #6897bb;
+	--cm-keyword: #cc7832;
+	--cm-type: #9876aa;
+	--cm-builtin: #cc7832;
+	--cm-string: #6a8759;
+	--cm-comment: #808080;
+	--cm-variable-2: #0055aa;
 	--cm-error-bg: #4a2226;
 	--cm-error-gutter: #ff8a8a;
+
+	--run-bg: #3474f0;
+	--run-bg-hover: #2a5ed0;
+	--run-fg: #ffffff;
+	--menu-hover: #393b41;
+
+	--code-bg: #1e1f22;
+	--code-border: #3a3a3a;
+	--code-out-bg: #000000;
+	--code-fg: #bbbbbb;
+
+	--header-bg: #242424;
+	--aside-bg: #1a1a1a;
+	--aside-border: #3a3a3a;
+	--help-btn-bg: #2a2a2d;
+	--help-btn-bg-hover: #2e2e31;
+	--help-btn-fg: #e0e0e0;
+	--help-btn-border: #737373;
+	--help-btn-border-hover: #a1a1a1;
+	--help-panel-border: #323438;
+	--help-panel-bg: #2a2a2d;
+	--help-panel-fg: #e0e0e0;
+	--help-kbd-bg: #1a1a1a;
+	--help-kbd-fg: #e0e0e0;
+	--help-kbd-border: #4a4a4a;
+	--help-kbd-inset: #2a2a2d;
+	--semi-dark-overlay: rgba(0, 0, 0, 0.5);
+
+	--inline-code-bg: #3b3c3c;
+	--block-code-bg: #1a1a1a;
+	--block-code-border: #323438;
+	--block-code-fg: #bebebf;
 }
 
 * {
@@ -131,7 +204,7 @@ code {
 	align-items: center;
 	justify-content: space-between;
 	padding: 0 12px;
-	background: var(--bg-raised);
+	background: var(--header-bg);
 	border-bottom: 1px solid var(--border);
 }
 
@@ -179,8 +252,8 @@ code {
 	bottom: 0;
 	width: 340px;
 	max-width: 85vw;
-	background: var(--bg-raised);
-	border-right: 1px solid var(--border);
+	background: var(--aside-bg);
+	border-right: 1px solid var(--aside-border);
 	overflow-y: auto;
 	padding: 16px;
 	z-index: 40;
@@ -290,28 +363,40 @@ code {
 	margin: 0 0 14px;
 }
 
+/* A code block in the lesson text is set to the editor's own metrics, so a
+   snippet on the page and the same snippet in the editor read as the same kind
+   of thing: same monospace face, same size, same line height, same border and
+   the same left inset the editor gives its code. */
 .slide-content pre {
-	background: var(--bg-sunken);
-	border: 1px solid var(--border);
+	background: var(--block-code-bg);
+	border: 1px solid var(--block-code-border);
 	border-radius: var(--radius);
-	padding: 12px 14px;
+	color: var(--block-code-fg);
+	padding: 12px 15px;
 	overflow-x: auto;
+	font-family: var(--mono);
+	font-size: 13.5px;
+	line-height: 1.57;
+	tab-size: 4;
 }
 
 .slide-content pre code {
-	font-size: 13px;
-	line-height: 1.5;
+	font-size: inherit;
+	line-height: inherit;
 }
 
 .slide-content code {
-	background: var(--bg-sunken);
+	background: var(--inline-code-bg);
+	color: var(--fg);
 	border-radius: 3px;
-	padding: 1px 4px;
+	padding: 1px 5px;
+	font-family: var(--mono);
 }
 
 .slide-content pre code {
 	background: none;
 	padding: 0;
+	color: inherit;
 }
 
 .slide-content ul {
@@ -368,8 +453,11 @@ code {
 	   a long program could not be scrolled inside the editor: the editor grew
 	   instead, and pushed the Run button below the fold. */
 	min-height: 0;
-	border-left: 1px solid var(--border);
-	background: var(--bg-raised);
+	/* The floating toolbar is positioned against this pane, not the viewport.
+	   Without this it lands in the page header instead. */
+	position: relative;
+	border-left: 1px solid var(--code-border);
+	background: var(--code-bg);
 }
 
 .splitter {
@@ -388,7 +476,8 @@ code {
 	display: flex;
 	gap: 2px;
 	padding: 6px 8px 0;
-	border-bottom: 1px solid var(--border);
+	border-bottom: 1px solid var(--code-border);
+	background: var(--code-bg);
 	flex: 0 0 auto;
 }
 
@@ -403,9 +492,9 @@ code {
 }
 
 .file-tab.active {
-	color: var(--fg);
+	color: var(--code-fg);
 	background: var(--bg-sunken);
-	border-color: var(--border);
+	border-color: var(--code-border);
 }
 
 .editor-wrap {
@@ -419,45 +508,150 @@ code {
 	height: 100%;
 	font-family: var(--mono);
 	font-size: 13.5px;
-	line-height: 1.55;
+	line-height: 1.57;
+	background: var(--code-bg);
 }
 
+/* Metrics copied from play.vlang.io so the editor reads the same as the
+   playground a learner is likely to have already used. */
+.editor-wrap .CodeMirror-line {
+	padding-left: 15px;
+}
+
+.editor-wrap .CodeMirror-gutters {
+	padding-left: 5px;
+}
+
+.editor-wrap .CodeMirror-linenumber {
+	font-size: 0.9em;
+}
+
+/* The toolbar floats over the top right of the code panel rather than taking a
+   row of its own, so the editor keeps the full height and the buttons sit on
+   the same edge a floating action bar would. The editor is given a top inset
+   so the first lines are never hidden underneath. */
 .file-menu {
-	flex: 0 0 auto;
+	position: absolute;
+	top: 10px;
+	right: 16px;
+	z-index: 5;
 	display: flex;
-	gap: 4px;
-	padding: 7px 8px;
-	border-top: 1px solid var(--border);
-	background: var(--bg-raised);
+	align-items: center;
+	gap: 8px;
+	padding: 0;
+	background: transparent;
+}
+
+.editor-wrap {
+	flex: 1 1 auto;
+	min-height: 120px;
+	overflow: hidden;
+	position: relative;
+	padding-top: 48px;
 }
 
 .menu-button {
-	font-size: 13px;
-	padding: 5px 12px;
-	border-radius: var(--radius);
-	border: 1px solid var(--border-strong);
+	display: inline-flex;
+	align-items: center;
+	height: 38px;
+	padding: 8px 20px 6px 17px;
+	font-family: inherit;
+	font-size: 15px;
+	line-height: 1.5;
+	border: 0;
+	border-radius: 12px;
 	color: var(--fg);
-	background: var(--bg-sunken);
+	background: transparent;
+	cursor: pointer;
+	transition: background-color 75ms;
 }
 
 .menu-button:hover {
-	border-color: var(--accent);
-	color: var(--accent);
+	background: var(--menu-hover);
 	text-decoration: none;
+}
+
+.menu-button:focus-visible {
+	outline: 2px solid var(--run-bg);
+	outline-offset: 2px;
+}
+
+#run {
+	background: var(--run-bg);
+	color: var(--run-fg);
+	font-weight: 500;
+}
+
+#run:hover {
+	background: var(--run-bg-hover);
+	color: var(--run-fg);
+}
+
+/* The output area is a collapsible panel with a tab strip, the way a terminal
+   panel works in an editor: the strip is always visible so the panel can be
+   reopened, and collapsing it gives the code the whole pane back. */
+.output-panel {
+	flex: 0 0 auto;
+	display: flex;
+	flex-direction: column;
+	border-top: 1px solid var(--code-border);
+	background: var(--code-out-bg);
+}
+
+.output-tabs {
+	flex: 0 0 auto;
+	display: flex;
+	background: var(--code-bg);
+}
+
+.output-tab {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 14px;
+	border: 0;
+	border-bottom: 2px solid transparent;
+	background: transparent;
+	color: var(--fg-muted);
+	font-family: inherit;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	cursor: pointer;
+}
+
+.output-tab:hover {
+	color: var(--fg);
+}
+
+.output-tab[aria-expanded="true"] {
+	color: var(--fg);
+	border-bottom-color: var(--run-bg);
+}
+
+.output-chevron {
+	transition: transform 120ms ease;
+}
+
+.output-tab[aria-expanded="true"] .output-chevron {
+	transform: rotate(180deg);
+}
+
+.output-panel.collapsed .output {
+	display: none;
 }
 
 .output {
 	flex: 0 0 auto;
 	max-height: 32vh;
 	overflow: auto;
-	padding: 10px 12px;
-	border-top: 1px solid var(--border);
+	padding: 10px 14px;
 	font-family: var(--mono);
 	font-size: 13px;
 	line-height: 1.5;
 	white-space: pre-wrap;
 	word-break: break-word;
-	background: var(--bg);
+	background: var(--code-out-bg);
 }
 
 .output:empty {
@@ -471,6 +665,104 @@ code {
 .out-stderr,
 .out-system {
 	color: var(--stderr);
+}
+
+/* --------------------------------------------------------------- help panel */
+/*
+ * Modelled on play.vlang.io's shortcuts tip: a small card anchored to the
+ * bottom right of the editor area, behind a click catcher, opened from a `?`
+ * button and from the keyboard.
+ */
+
+.help-overlay {
+	position: fixed;
+	inset: 0;
+	background: var(--semi-dark-overlay);
+	z-index: 45;
+}
+
+.help-overlay[hidden] {
+	display: none;
+}
+
+.help-panel {
+	position: fixed;
+	right: 24px;
+	bottom: 24px;
+	width: 320px;
+	max-width: calc(100vw - 32px);
+	padding: 16px 18px;
+	border: 1px solid var(--help-panel-border);
+	border-radius: 10px;
+	background: var(--help-panel-bg);
+	color: var(--help-panel-fg);
+	box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.28);
+	z-index: 46;
+}
+
+.help-panel[hidden] {
+	display: none;
+}
+
+.help-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 14px;
+}
+
+.help-header h3 {
+	margin: 0;
+	font-size: 16px;
+}
+
+.help-close {
+	display: grid;
+	place-items: center;
+	width: 26px;
+	height: 26px;
+	border: 0;
+	border-radius: 5px;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+}
+
+.help-close:hover {
+	background: var(--menu-hover);
+}
+
+.help-shortcut {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.help-desc {
+	font-size: 14px;
+	color: var(--help-panel-fg);
+}
+
+.help-keys {
+	font-size: 13px;
+	white-space: nowrap;
+	color: var(--fg-muted);
+}
+
+/* kbd styling follows play.vlang.io's shortcut tip, with the colours taken from
+   the active theme rather than left light in both. */
+.help-keys kbd {
+	display: inline-block;
+	font-family: var(--sans);
+	font-size: 12px;
+	border: 1px solid var(--help-kbd-border);
+	border-radius: 4px;
+	padding: 1px 5px 2px;
+	background: var(--help-kbd-bg);
+	color: var(--help-kbd-fg);
+	box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), inset 0 0 0 2px var(--help-kbd-inset);
 }
 
 /* --------------------------------------------------------------------- list */
@@ -540,13 +832,13 @@ code {
 /* ---------------------------------------------------------------- CodeMirror */
 
 .CodeMirror {
-	background: var(--bg-raised);
-	color: var(--fg);
+	background: var(--code-bg);
+	color: var(--code-fg);
 }
 
 .CodeMirror-gutters {
 	background: var(--cm-gutter-bg);
-	border-right: 1px solid var(--border);
+	border-right: 1px solid var(--code-border);
 }
 
 .CodeMirror-linenumber {
@@ -554,8 +846,10 @@ code {
 	padding: 0 8px 0 6px;
 }
 
+/* The playground draws a thin caret with no width of its own. */
 .CodeMirror-cursor {
-	border-left: 2px solid var(--cm-cursor);
+	border-left: 1px solid var(--cm-cursor);
+	width: 0;
 }
 
 .CodeMirror-selected {
@@ -569,47 +863,54 @@ code {
 .CodeMirror-matchingbracket {
 	background: var(--cm-matching);
 	color: inherit !important;
-	outline: 1px solid var(--border-strong);
+	padding: 1px 0;
 }
 
-.cm-s-vlang .cm-atom {
+.CodeMirror-nonmatchingbracket {
+	color: #a22;
+}
+
+.CodeMirror .cm-atom {
 	color: var(--cm-atom);
 }
 
-.cm-s-vlang .cm-number {
+.CodeMirror .cm-number {
 	color: var(--cm-number);
 }
 
-.cm-s-vlang .cm-keyword {
+.CodeMirror .cm-keyword {
 	color: var(--cm-keyword);
 }
 
-.cm-s-vlang .cm-type {
+.CodeMirror .cm-type {
 	color: var(--cm-type);
+	/* play.vlang.io sets type names in bold, which is what separates a type from
+	   a variable at a glance. */
+	font-weight: 700;
 }
 
-.cm-s-vlang .cm-builtin {
+.CodeMirror .cm-builtin {
 	color: var(--cm-builtin);
 }
 
-.cm-s-vlang .cm-string {
+.CodeMirror .cm-string {
 	color: var(--cm-string);
 }
 
-.cm-s-vlang .cm-string-2 {
+.CodeMirror .cm-string-2 {
 	color: var(--cm-string);
 }
 
-.cm-s-vlang .cm-comment {
+.CodeMirror .cm-comment {
 	color: var(--cm-comment);
 	font-style: italic;
 }
 
-.cm-s-vlang .cm-variable-2 {
+.CodeMirror .cm-variable-2 {
 	color: var(--cm-variable-2);
 }
 
-.cm-s-vlang .cm-operator {
+.CodeMirror .cm-operator {
 	color: var(--fg-muted);
 }
 

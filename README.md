@@ -257,4 +257,5 @@ empty, or if the deliberately broken page stopped being broken.
 
 ## Licence
 
-MIT.
+MIT, see [LICENSE](LICENSE). Third party code and assets keep their own
+licences, listed in [THIRD_PARTY.md](THIRD_PARTY.md).

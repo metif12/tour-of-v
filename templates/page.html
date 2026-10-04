@@ -36,15 +36,33 @@
 				<textarea id="editor"></textarea>
 			</div>
 
-			<div class="file-menu" id="file-menu">
-				<a href="#" id="run" class="menu-button">Run</a>
-				<a href="#" id="reset" class="menu-button">Reset</a>
-				@if has_solution
-					<a href="#" id="solution" class="menu-button">Solution</a>
-				@end
-			</div>
+			@if has_tools
+				<div class="file-menu" id="file-menu">
+					<a href="#" id="run" class="menu-button">Run</a>
+					@if has_format
+						<a href="#" id="format" class="menu-button">Format</a>
+					@end
+					<a href="#" id="reset" class="menu-button">Reset</a>
+					@if has_solution
+						<a href="#" id="solution" class="menu-button">Solution</a>
+					@end
+				</div>
+			@end
 
-			<div class="output" id="output"></div>
+			<div class="output-panel" id="output-panel">
+				<div class="output-tabs">
+					<button class="output-tab" id="output-toggle" aria-expanded="true"
+						aria-controls="output">
+						<svg class="output-chevron" width="14" height="14" viewBox="0 0 16 16"
+							aria-hidden="true">
+							<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none"
+								stroke-linecap="round" stroke-linejoin="round" />
+						</svg>
+						<span>Output</span>
+					</button>
+				</div>
+				<div class="output" id="output"></div>
+			</div>
 		</div>
 	@end
 </div>

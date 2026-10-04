@@ -154,6 +154,14 @@ pub fn (mut app App) page(mut ctx Context, slug string, number int) veb.Result {
 	has_code := page_data.files.len > 0
 	has_solution := page_data.solution.len > 0
 	has_files_tabs := page_data.files.len > 1
+	// The toolbar sits above the editor, the way play.vlang.io puts its tools
+	// above the editors and its terminal below them.
+	has_tools := has_code
+	// Format is only offered when it can actually work. `v fmt` builds its own
+	// helper tool, and that cannot be done inside the sandbox the tour runs
+	// untrusted code in, so today this is always false. It is kept as a flag
+	// rather than deleted so restoring the button is a one line change.
+	has_format := false
 	prev_page := page_data.prev
 	next_page := page_data.next
 	has_prev := prev_page.slug != ''

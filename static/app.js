@@ -263,6 +263,42 @@
 		this.el.scrollTop = this.el.scrollHeight
 	}
 
+	// ------------------------------------------------------------ output panel
+
+	// The output panel has a tab strip that opens and closes it, the way a
+	// terminal panel does in an editor. The state is remembered, because a
+	// learner who closes it once usually wants it to stay closed.
+	function initOutput() {
+		var panel = document.getElementById('output-panel')
+		var toggle = document.getElementById('output-toggle')
+		if (!panel || !toggle) return
+
+		function setOpen(open) {
+			panel.classList.toggle('collapsed', !open)
+			toggle.setAttribute('aria-expanded', open ? 'true' : 'false')
+			savePref('outputOpen', open ? '1' : '0')
+		}
+
+		toggle.addEventListener('click', function () {
+			setOpen(panel.classList.contains('collapsed'))
+		})
+
+		setOpen(loadPref('outputOpen', '1') !== '0')
+	}
+
+	// revealOutput opens the panel if the learner closed it, so that running a
+	// program never appears to do nothing.
+	function revealOutput() {
+		var panel = document.getElementById('output-panel')
+		var toggle = document.getElementById('output-toggle')
+		if (!panel || !toggle) return
+		if (panel.classList.contains('collapsed')) {
+			panel.classList.remove('collapsed')
+			toggle.setAttribute('aria-expanded', 'true')
+			savePref('outputOpen', '1')
+		}
+	}
+
 	// --------------------------------------------------------------- the page
 
 	function initLesson(data) {
@@ -339,6 +375,7 @@
 			running = true
 			clearErrorMark()
 			output.clear()
+			revealOutput()
 
 			var file = lesson.current()
 			post('/api/run', {
@@ -511,11 +548,63 @@
 		}
 	}
 
+	// ------------------------------------------------------------------- help
+
+	function initHelp() {
+		var button = document.getElementById('help-toggle')
+		var panel = document.getElementById('help-panel')
+		var overlay = document.getElementById('help-overlay')
+		var close = document.getElementById('help-close')
+		if (!button || !panel) return
+
+		function setOpen(open) {
+			panel.hidden = !open
+			if (overlay) overlay.hidden = !open
+			button.setAttribute('aria-expanded', open ? 'true' : 'false')
+		}
+
+		button.addEventListener('click', function () {
+			setOpen(panel.hidden)
+		})
+		if (close) {
+			close.addEventListener('click', function () {
+				setOpen(false)
+				button.focus()
+			})
+		}
+		if (overlay) {
+			overlay.addEventListener('click', function () {
+				setOpen(false)
+			})
+		}
+
+		document.addEventListener('keydown', function (e) {
+			if (e.key === 'Escape' && !panel.hidden) {
+				setOpen(false)
+				button.focus()
+				return
+			}
+			// `?` opens and closes the list, the way it works on the playground.
+			// Typed characters are left alone, so only a bare `?` counts.
+			var typing = e.target && (e.target.isContentEditable ||
+				e.target.tagName === 'TEXTAREA' ||
+				e.target.tagName === 'INPUT' ||
+				(e.target.classList && e.target.classList.contains('CodeMirror')))
+			if (!typing && e.key === '?') {
+				setOpen(panel.hidden)
+			}
+		})
+
+		setOpen(false)
+	}
+
 	// ------------------------------------------------------------------ boot
 
 	function boot() {
 		initTheme()
 		initToc()
+		initHelp()
+		initOutput()
 		initPager()
 		initSplitter()
 
