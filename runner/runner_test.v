@@ -170,3 +170,65 @@ fn test_strip_isolate_status_keeps_program_output_that_looks_similar() {
 fn test_strip_isolate_status_survives_empty_output() {
 	assert runner.strip_isolate_status('') == ''
 }
+
+// isolate reports the process cap it applied on its own status line, so the
+// flag has to be present and has to carry the right number.
+fn test_compile_limit_allows_the_compiler_thread_pool() {
+	// V builds a thread pool sized from the CPU count when the compiler starts.
+	// If this cap is not comfortably above the program cap, the compiler dies
+	// before printing anything and every build looks like an empty failure.
+	compile := runner.compile_limits()
+	assert '--processes=${runner.max_compiler_processes}' in compile
+	assert runner.max_compiler_processes > runner.max_program_processes
+}
+
+fn test_run_limit_keeps_the_fork_bomb_cap() {
+	// The submitted program is the untrusted thing here, so its cap stays tight
+	// and must not drift upward with the compiler's.
+	run := runner.run_limits()
+	assert '--processes=${runner.max_program_processes}' in run
+	assert runner.max_program_processes <= 10
+}
+
+fn test_every_box_gets_a_writable_home_and_a_path() {
+	// Without HOME the compiler has nowhere to put its temporary files, and
+	// without PATH isolate's empty environment hides the C compiler.
+	for limits in [runner.compile_limits(), runner.run_limits(), runner.tool_limits()] {
+		assert '--env=HOME=/box' in limits
+		assert limits.any(it.starts_with('--env=PATH='))
+	}
+}
+
+fn test_compile_flags_actually_reach_the_compiler() {
+	// compile_flags used to be a constant nothing read, so a build got none of
+	// it. These are the flags whose absence changes what a learner sees.
+	args := runner.compile_flag_args()
+	assert '-cc' in args
+	assert 'gcc' in args
+	assert '-no-retry-compilation' in args
+	assert '-no-parallel' in args
+	assert '-g' in args
+	assert '-DGC_MARKERS=1' in args
+}
+
+fn test_format_flag_args_splits_into_separate_arguments() {
+	assert runner.format_flag_args() == ['-verify']
+}
+
+fn test_binary_name_is_the_executable_the_compiler_writes() {
+	// `v main.v` writes `main`. Running `./main.v` instead fails with
+	// `execve("./main.v"): Permission denied` after a build that succeeded,
+	// which reads like a broken sandbox rather than a name mismatch.
+	assert runner.binary_name('main.v') == 'main'
+	assert runner.binary_name('hello.v') == 'hello'
+}
+
+fn test_binary_name_keeps_a_directory_out_of_the_path() {
+	// The executable is written to the top of the box, so a path is stripped.
+	assert runner.binary_name('dir/main.v') == 'main'
+}
+
+fn test_binary_name_leaves_a_name_without_the_v_suffix_alone() {
+	assert runner.binary_name('main') == 'main'
+	assert runner.binary_name('weird') == 'weird'
+}

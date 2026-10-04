@@ -613,16 +613,48 @@ code {
 /* ------------------------------------------------------------------ narrower */
 
 @media (max-width: 860px) {
-	.lesson {
-		grid-template-columns: 1fr;
-		grid-template-rows: auto 6px 1fr;
+	/* Below this width the two panes are stacked rather than side by side, and
+	   a bounded grid row cannot hold the lesson: the prose is taller than the
+	   viewport, so the grid overflowed its container and #content, which is
+	   overflow: hidden, clipped the overflow with no scrollbar to reach it. The
+	   bottom of the explanation and the whole code pane were simply
+	   unreachable. Letting #content scroll is what makes the page usable here.
+	*/
+	#content {
+		overflow: auto;
 	}
 
+	.lesson {
+		height: auto;
+		grid-template-columns: 1fr;
+		grid-template-rows: auto auto;
+	}
+
+	/* The splitter divides two side by side panes. Stacked, there is nothing to
+	   divide, and it would sit between the panes as a dead rule. */
 	.splitter {
-		cursor: row-resize;
+		display: none;
 	}
 
 	.prose-pane {
 		padding: 20px 18px 40px;
+		overflow-y: visible;
+	}
+
+	.code-pane {
+		border-left: 0;
+		border-top: 1px solid var(--border);
+	}
+
+	/* CodeMirror needs a height of its own once it is no longer filling a
+	   bounded grid row. */
+	.editor-wrap {
+		flex: 0 0 auto;
+		height: 55vh;
+		min-height: 260px;
+	}
+
+	.editor-wrap .CodeMirror {
+		height: 100%;
 	}
 }

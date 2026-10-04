@@ -142,7 +142,7 @@ pub fn run(files []SourceFile) RunResult {
 		}
 	}
 
-	out := exec_boxed(b, root, run_limits(), ['./${main_name}'])
+	out := exec_boxed(b, root, run_limits(), ['./${binary_name(main_name)}'])
 
 	mut output := strip_isolate_status(out.output)
 	limited := hit_resource_limit(out)
@@ -208,7 +208,8 @@ pub fn compiler_version() string {
 	if res.exit_code != 0 {
 		return ''
 	}
-	return res.output.trim_space()
+	// isolate appends its own timing line, which is not part of the version.
+	return strip_isolate_status(res.output).trim_space()
 }
 
 // write_files lays a submission down inside the box.
@@ -238,6 +239,21 @@ fn pick_main(files []SourceFile) string {
 		}
 	}
 	return files[0].name
+}
+
+// binary_name is the executable the compiler leaves behind for a source file.
+//
+// `v main.v` writes `main`, not `main.v`, so the run phase has to ask the
+// compiler's naming rule rather than reuse the source name. Getting this wrong
+// is quiet: the build succeeds, and the run fails with `execve("./main.v"):
+// Permission denied`, which reads like a sandbox problem rather than a name
+// mismatch.
+pub fn binary_name(source_name string) string {
+	base := source_name.all_after('/')
+	if base.ends_with('.v') {
+		return base[..base.len - 2]
+	}
+	return base
 }
 
 // hit_resource_limit reports whether a program was stopped by a limit rather

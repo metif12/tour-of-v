@@ -9,9 +9,28 @@
 // program that behaves here behaves the same way at play.vlang.io.
 module runner
 
-// max_processes caps threads and processes inside a box, which is what stops
-// a fork bomb.
-const max_processes = 10
+// max_program_processes caps threads and processes inside a box while a
+// submitted program is running, which is what stops a fork bomb.
+const max_program_processes = 10
+
+// max_compiler_processes caps them while the V compiler runs, and it has to be
+// far higher than the program cap.
+//
+// V builds a thread pool sized from the CPU count as the compiler starts, so a
+// cap anywhere near the program cap starves it before it does any work. The
+// compiler then dies with
+//
+//	V panic: `go sync__pool__process_in_thread()`: Resource temporarily unavailable
+//
+// before printing anything, so the failure reaches the diagnostics parser as
+// an empty string and reads like the sandbox silently refusing to compile.
+// Measured on a 12-CPU host: 10 fails, 20 compiles. 64 leaves headroom for
+// larger hosts while still bounding what a submission can spawn while it is
+// being compiled.
+//
+// This is a cap and not an allowance. Nothing here raises the container's own
+// limits, and the submitted program still runs under max_program_processes.
+const max_compiler_processes = 64
 
 // Compiler and program memory limits, in KiB.
 //
@@ -64,8 +83,9 @@ const max_boxes = 64
 //
 //   -g             emit debug info, which is what gives runtime errors a
 //                  usable `file:line:column` instead of a bare address
-//   -no-parallel   the compiler forks a C build per translation unit; inside a
-//                  10 process box that competes with the program for the cap
+//   -no-parallel   the compiler forks a C build per translation unit, which
+//                  competes with its own thread pool for max_compiler_processes
+//                  and makes a build slower than it needs to be
 //   -no-retry-compilation
 //                  do not silently retry, so a failure is reported once
 const compile_flags = '-cflags -DGC_MARKERS=1 -no-parallel -no-retry-compilation -g'
@@ -86,8 +106,17 @@ fn split_flags(flags string) []string {
 // finds it, and the two do not always agree on the generated C. Naming the C
 // compiler keeps a submitted program's build reproducible, which also matters
 // because the container is what decides what a learner sees.
+//
+// compile_flags used to sit here as a comment while the function returned only
+// `-cc gcc`, so none of it reached a build: no debug info, and the compiler's
+// silent retry was left on. That retry matters more than it looks, because it
+// is what turns one C compiler into two attempts and lets a later attempt
+// succeed after an earlier one failed, so the diagnostics end up describing a
+// build that is not the one whose output the learner sees.
 pub fn compile_flag_args() []string {
-	return ['-cc', 'gcc']
+	mut args := ['-cc', 'gcc']
+	args << split_flags(compile_flags)
+	return args
 }
 
 // format_flag_args returns the formatter flags as separate arguments.
@@ -112,9 +141,9 @@ pub fn box_env() []string {
 // pages touched, and the V compiler reserves a great deal of virtual memory
 // before it allocates anything real. A limit sized for a program's actual usage
 // starves the compiler before it starts.
-fn compile_limits() []string {
+pub fn compile_limits() []string {
 	mut limits := [
-		'--processes=${max_processes}',
+		'--processes=${max_compiler_processes}',
 		'--mem=${max_compiler_memory_kb}',
 		'--wall-time=${wall_compile_seconds}',
 	]
@@ -126,9 +155,9 @@ fn compile_limits() []string {
 //
 // Both a CPU limit and a slightly larger wall clock limit, which together stop
 // a spinning program and a sleeping one.
-fn run_limits() []string {
+pub fn run_limits() []string {
 	mut limits := [
-		'--processes=${max_processes}',
+		'--processes=${max_program_processes}',
 		'--mem=${max_run_memory_kb}',
 		'--time=${run_cpu_seconds}',
 		'--wall-time=${wall_seconds}',
@@ -139,10 +168,13 @@ fn run_limits() []string {
 
 // tool_limits are the isolate limits for `v fmt` and `v -version`.
 //
-// Short, single purpose invocations, so a tighter process cap and no CPU limit.
-fn tool_limits() []string {
+// The wall clock is what bounds these, since both are short single purpose
+// invocations. The process cap is the compiler's rather than the program's,
+// because `v fmt` boots the same front-end and would otherwise be starved by
+// the same thread pool the compile step is.
+pub fn tool_limits() []string {
 	mut limits := [
-		'--processes=3',
+		'--processes=${max_compiler_processes}',
 		'--mem=${max_compiler_memory_kb}',
 		'--wall-time=${wall_seconds}',
 	]

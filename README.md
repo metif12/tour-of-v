@@ -173,36 +173,56 @@ compiler error carrying a highlighted source excerpt would otherwise reach the
 browser as literal `ESC [ 3 1 m` bytes, and rendering colour from program
 output would mean inserting markup built from it.
 
-Not yet verified end to end:
+Verified end to end: a submitted program compiles and runs inside the sandbox,
+and `--self-test-only` passes in the privileged container.
 
-**A compile and run inside the container's sandbox.** The image builds and the
-sandbox itself works — isolate creates boxes, enforces namespaces, and contains
-the probes. What is not yet proven is the V compiler completing a build *inside*
-a box. Two upstream V bugs at the pinned commit stand in the way:
+Getting there needed four separate fixes, and the reasons are worth keeping
+because each one hid the next:
 
-1. `vlib/builtin/backtraces_nix.c.v` generates C that does not compile —
-   `addr2line_executable` reaches `backtrace_exec_capture` as an `int` where an
-   argument array is expected. This is the same failure that broke a plain
-   `v main.v` during the build, so it is not specific to the sandbox.
-2. The compiler's C fallback bootstrap passes a shell command list to the
-   process spawner as a single argv, so `make v1` fails with `&&` treated as a
-   filename. The fallback is needed because the V installation is mounted read
-   only.
+1. **`--processes=10` starved the compiler.** V builds a thread pool sized from
+   the CPU count when the compiler starts. Under isolate's process cap the
+   compiler died with `V panic: sync__pool__process_in_thread(): Resource
+   temporarily unavailable` before printing anything, so every build arrived as
+   an empty failure that read like the sandbox refusing to compile. The compile
+   phase now gets its own, larger cap while a submitted program keeps the tight
+   one. Measured on a 12-CPU host: 10 fails, 20 compiles.
 
-Both are in the compiler, not in this project. The pinned commit is
-`a9e7ec2e0e41229a6e1acda45fbda5065527e9e5`; moving to a newer V is likely to
-clear both, and the application code should not need to change.
+2. **The run phase executed the source file.** It ran `./main.v` rather than the
+   `main` that `v main.v` writes, so a successful build failed with `execve:
+   Permission denied`. The name now comes from the compiler's own rule.
 
-Worked around deliberately rather than patched here: `install_v1_fallback.sh`
-is itself a shell script, so its `oldv` path could be replicated by hand in the
-Dockerfile. That was not done. Reimplementing a compiler's cache layout in a
-Dockerfile is the kind of coupling that fails silently, and the failure mode
-here is the sandbox quietly ceasing to contain code — which is precisely what
-the self-test exists to detect, but only if nobody has papered over it first.
+3. **`compile_flags` was dead.** It was declared and documented but never read,
+   so no build received `-g`, `-no-retry-compilation`, `-no-parallel` or
+   `-cflags -DGC_MARKERS=1`. Wiring it up also removed a `GC Warning: Marker
+   thread N creation failed` line that had been appearing in program output.
 
-Until then, `TOUR_SKIP_SELF_TEST=1` runs the server without a sandbox. That is
-for local development on a machine where running code is already something you
-permit. Do not expose it.
+4. **The compiler that runs a submission is now the official 0.5.2 release**, not
+   the pinned source build. The pinned build cannot compile a hello world with
+   the default C toolchain: its C generator passes an `int` where
+   `backtrace_exec_capture` expects a `struct array`, so both tcc and gcc reject
+   the output. Upstream tracks this as [vlang/v#29412]. An ordinary V install
+   hides it by retrying with the 0.5.2 release, which would have cost three
+   compiler invocations per Run and mixed a failed build's diagnostics into the
+   output a learner reads. The release binary is checksum verified against the
+   SHA256 upstream publishes. The pinned source build still compiles the tour
+   itself, because `main.v` imports `json2`, which the release carries as
+   `x.json2`.
+
+Two upstream bugs were found along the way and are worth reporting rather than
+working around. `cmd/tools/oldv.v` runs the command it is given through
+`os.exec_or_exit`, which execs an argv array with no shell, so the `&&` in
+`install_v1_fallback.sh` arrives as a literal filename and `make v1` cannot
+install the fallback. It is not reached by this image any more, and it is left
+alone rather than patched in the Dockerfile.
+
+The self-test also had two probes that asserted the wrong thing. One checked
+whether the program's own directory existed, which it always does inside a box,
+so it reported an escape that was not happening. Both probes now test host-only
+paths. The sandbox itself was never wrong; the test was.
+
+`TOUR_SKIP_SELF_TEST=1` runs the server without a sandbox. That is for local
+development on a machine where running code is already something you permit. Do
+not expose it.
 
 ## Developing
 

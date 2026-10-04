@@ -287,9 +287,6 @@
 				'Shift-Enter': function () {
 					run()
 				},
-				'Ctrl-Enter': function () {
-					format()
-				},
 				'PageDown': function () {
 					goPage(1)
 				},
@@ -373,31 +370,11 @@
 			})
 		}
 
-		function format() {
-			post('/api/format', {
-				code: lesson.editor.getValue(),
-				filename: lesson.current().name
-			}).then(function (res) {
-				if (res.body) {
-					lesson.editor.setValue(res.body)
-					lesson.save()
-				} else if (res.error) {
-					output.write(res.error, 'system')
-				}
-			}).catch(function (err) {
-				output.write('Could not reach the server: ' + err.message, 'system')
-			})
-		}
-
 		// ----------------------------------------------------------- wiring up
 
 		on('run', function (e) {
 			e.preventDefault()
 			run()
-		})
-		on('format', function (e) {
-			e.preventDefault()
-			format()
 		})
 		on('reset', function (e) {
 			e.preventDefault()
@@ -461,7 +438,19 @@
 
 		var MIN = 20
 
+		// Below this width the panes are stacked and the splitter is hidden, so
+		// there is no column split to remember or restore. The split used to be
+		// written as an inline style on load, and an inline style outranks the
+		// media query that stacks the panes, so a narrow window kept the
+		// side by side layout with the code pane crushed into the 6px gap the
+		// hidden splitter used to occupy.
+		var stacked = window.matchMedia('(max-width: 860px)')
+
 		function apply(percent) {
+			if (stacked.matches) {
+				lesson.style.removeProperty('grid-template-columns')
+				return
+			}
 			percent = Math.max(MIN, Math.min(100 - MIN, percent))
 			lesson.style.gridTemplateColumns = percent + '% 6px 1fr'
 			savePref('split', percent)
@@ -511,6 +500,15 @@
 
 		var saved = loadPref('split', null)
 		apply(saved ? parseFloat(saved) : 50)
+
+		// Crossing the breakpoint in either direction has to re-apply, because
+		// the stacked layout is expressed in CSS and the split is inline.
+		var onChange = function () { apply(parseFloat(loadPref('split', null)) || 50) }
+		if (stacked.addEventListener) {
+			stacked.addEventListener('change', onChange)
+		} else if (stacked.addListener) {
+			stacked.addListener(onChange)
+		}
 	}
 
 	// ------------------------------------------------------------------ boot

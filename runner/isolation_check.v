@@ -1,6 +1,5 @@
 module runner
 
-import os
 import time
 
 // IsolationVerdict is the outcome of the startup self-test.
@@ -68,7 +67,7 @@ pub fn self_test() IsolationVerdict {
 		Probe{
 			name:   'filesystem'
 			why:    'a sandboxed program must not be able to read the host filesystem'
-			body:   "import os\n\nfn main() {\n\tif os.exists('/etc/passwd') {\n\t\tprintln('READ ' + os.read_file('/etc/passwd') or { '' })\n\t}\n\tif os.exists(os.dir(os.executable())) {\n\t\tprintln('ESCAPED')\n\t}\n}\n"
+			body:   "import os\n\nfn main() {\n\thost_paths := ['/etc/passwd', '/etc/shadow', '/root/.ssh/authorized_keys']\n\tfor path in host_paths {\n\t\tif os.read_file(path) or { '' } != '' {\n\t\t\tprintln('READ ' + path)\n\t\t}\n\t}\n}\n"
 			expect: .no_marker
 		},
 		Probe{
@@ -92,7 +91,11 @@ pub fn self_test() IsolationVerdict {
 		Probe{
 			name:   'escape attempt'
 			why:    'a sandboxed program must not be able to write outside its box'
-			body:   "import os\n\nfn main() {\n\tfor path in ['/tmp/escape-probe', '/escape-probe', os.dir(os.executable()) + '/escape-probe'] {\n\t\tif os.write_file(path, 'x') or { '' } == 'x' {\n\t\t\tprintln('WROTE ' + path)\n\t\t}\n\t}\n}\n"
+			// Only the program's own directory is writable inside the box, and
+			// that directory is always /box. Writing there is the program doing
+			// its job, not an escape, so it must not be part of the probe: the
+			// root, /etc and /usr are the parts that have to refuse a write.
+			body:   "import os\n\nfn main() {\n\tfor path in ['/escape-probe', '/etc/escape-probe', '/usr/escape-probe'] {\n\t\tif os.write_file(path, 'x') or { '' } == 'x' {\n\t\t\tprintln('WROTE ' + path)\n\t\t}\n\t}\n}\n"
 			expect: .no_marker
 		},
 	]

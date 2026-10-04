@@ -68,8 +68,9 @@ using the <b>previous</b> and <b>next</b> links below the text, or with the
 result appears below the code.</p>
 <p>These programs are meant to be starting points for your own
 experimentation. Edit the program and run it again.</p>
-<p>When you click <b>Format</b> (or <code>Ctrl</code>+<code>Enter</code>)
-the text is formatted with <code>v fmt</code>.</p>"
+<p>The tour does not offer a <b>Format</b> button. <code>v fmt</code> needs its
+own helper tool, and that tool cannot be built inside the sandbox the tour runs
+untrusted code in.</p>"
 
 const welcome_using = '<p>Each page has a left column of text and a right
 column of code. Between them is a drag handle: drag it to give the code more
