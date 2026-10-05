@@ -24,10 +24,16 @@ pub fn welcome() Module {
 					Page{
 						title: 'Using this tour'
 						body:  welcome_using
+						code:  Example{
+							files: [using_tour_file]
+						}
 					},
 					Page{
 						title: 'V offline (optional)'
 						body:  welcome_offline
+						code:  Example{
+							files: [v_offline_file]
+						}
 					},
 					Page{
 						title: 'The sandbox'
@@ -39,6 +45,9 @@ pub fn welcome() Module {
 					Page{
 						title: 'Congratulations!'
 						body:  welcome_done
+						code:  Example{
+							files: [welcome_done_file]
+						}
 					},
 				]
 			},
@@ -119,3 +128,21 @@ const welcome_done = "<p>You finished the first module of the tour!</p>
 <p>Go back to the <a href='/list'>list of modules</a> to find what to learn
 next, or continue straight to <a href='/basics/1'>the basics of the
 language</a>.</p>"
+
+// Every page carries a program, so the code panel is never missing and the
+// reader always has somewhere to type. On the closing page it is a short
+// program that shows what the tour used.
+const using_tour_file = CodeFile{
+	name: 'using_the_tour.v'
+	body: $embed_file('examples/using_the_tour.v').to_string()
+}
+
+const v_offline_file = CodeFile{
+	name: 'v_offline.v'
+	body: $embed_file('examples/v_offline.v').to_string()
+}
+
+const welcome_done_file = CodeFile{
+	name: 'congratulations.v'
+	body: $embed_file('examples/congratulations.v').to_string()
+}

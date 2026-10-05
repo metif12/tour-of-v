@@ -263,39 +263,84 @@
 		this.el.scrollTop = this.el.scrollHeight
 	}
 
-	// ------------------------------------------------------------ output panel
+	// -------------------------------------------------------- input and output
 
-	// The output panel has a tab strip that opens and closes it, the way a
-	// terminal panel does in an editor. The state is remembered, because a
-	// learner who closes it once usually wants it to stay closed.
+	// Input and output share a tab strip under the editor. Each half opens and
+	// closes on its own, because the two are independent: most programs never
+	// read stdin, and closing the output should not throw away typed input.
 	function initOutput() {
-		var panel = document.getElementById('output-panel')
-		var toggle = document.getElementById('output-toggle')
-		if (!panel || !toggle) return
+		var panel = document.getElementById('io-panel')
+		var outToggle = document.getElementById('output-toggle')
+		var inToggle = document.getElementById('input-toggle')
+		var stdinPanel = document.getElementById('stdin-panel')
+		var outEl = document.getElementById('output')
+		var stdinEl = document.getElementById('stdin')
+		if (!panel || !outToggle) return
 
-		function setOpen(open) {
-			panel.classList.toggle('collapsed', !open)
-			toggle.setAttribute('aria-expanded', open ? 'true' : 'false')
+		function setOutput(open) {
+			outEl.hidden = !open
+			outToggle.setAttribute('aria-expanded', open ? 'true' : 'false')
 			savePref('outputOpen', open ? '1' : '0')
 		}
 
-		toggle.addEventListener('click', function () {
-			setOpen(panel.classList.contains('collapsed'))
+		function setInput(open) {
+			stdinPanel.hidden = !open
+			inToggle.setAttribute('aria-expanded', open ? 'true' : 'false')
+			savePref('inputOpen', open ? '1' : '0')
+		}
+
+		outToggle.addEventListener('click', function () {
+			setOutput(outEl.hidden)
 		})
 
-		setOpen(loadPref('outputOpen', '1') !== '0')
+		if (inToggle && stdinPanel) {
+			inToggle.addEventListener('click', function () {
+				setInput(stdinPanel.hidden)
+			})
+		}
+
+		// Output starts open, because a learner who just pressed Run needs to see
+		// something. Input starts closed: most programs do not read stdin, and an
+		// empty box under the editor invites typing into it for no reason.
+		setOutput(loadPref('outputOpen', '1') !== '0')
+		if (inToggle && stdinPanel) {
+			setInput(loadPref('inputOpen', '0') === '1')
+		}
+
+		// The strip is pointless once both halves are closed, so it collapses too
+		// and the editor gets the space back.
+		function refreshPanel() {
+			var bothClosed = outEl.hidden && (!stdinPanel || stdinPanel.hidden)
+			panel.classList.toggle('collapsed', bothClosed)
+		}
+
+		outToggle.addEventListener('click', refreshPanel)
+		if (inToggle) inToggle.addEventListener('click', refreshPanel)
+		refreshPanel()
+
+		// Remembered so a learner who types input once does not lose it by
+		// navigating to the next page and back.
+		if (stdinEl) {
+			var saved = loadPref('stdin', '')
+			if (saved) stdinEl.value = saved
+			stdinEl.addEventListener('input', function () {
+				savePref('stdin', stdinEl.value)
+			})
+		}
 	}
 
-	// revealOutput opens the panel if the learner closed it, so that running a
+	// revealOutput opens the output if the learner closed it, so that running a
 	// program never appears to do nothing.
 	function revealOutput() {
-		var panel = document.getElementById('output-panel')
-		var toggle = document.getElementById('output-toggle')
-		if (!panel || !toggle) return
-		if (panel.classList.contains('collapsed')) {
-			panel.classList.remove('collapsed')
-			toggle.setAttribute('aria-expanded', 'true')
+		var panel = document.getElementById('io-panel')
+		var outEl = document.getElementById('output')
+		var outToggle = document.getElementById('output-toggle')
+		if (!panel || !outEl) return
+		if (outEl.hidden) {
+			outEl.hidden = false
+			outToggle.setAttribute('aria-expanded', 'true')
 			savePref('outputOpen', '1')
+			panel.classList.remove('collapsed')
 		}
 	}
 
@@ -322,6 +367,9 @@
 			extraKeys: {
 				'Shift-Enter': function () {
 					run()
+				},
+				'Ctrl-Enter': function () {
+					format()
 				},
 				'PageDown': function () {
 					goPage(1)
@@ -409,9 +457,35 @@
 
 		// ----------------------------------------------------------- wiring up
 
+		function format() {
+			var el = document.getElementById('format')
+			// The button is absent on a page with no program to format, and on a
+			// build where formatting is unavailable. Both are normal, so this
+			// silently does nothing rather than throwing.
+			if (!el) return
+			post('/api/format', {
+				code: lesson.editor.getValue(),
+				filename: lesson.current().name
+			}).then(function (res) {
+				if (res.body !== undefined && res.body !== null && res.error === '') {
+					lesson.editor.setValue(res.body)
+					lesson.save()
+					clearErrorMark()
+				} else if (res.error) {
+					output.write(res.error, 'system')
+				}
+			}).catch(function (err) {
+				output.write('Could not reach the server: ' + err.message, 'system')
+			})
+		}
+
 		on('run', function (e) {
 			e.preventDefault()
 			run()
+		})
+		on('format', function (e) {
+			e.preventDefault()
+			format()
 		})
 		on('reset', function (e) {
 			e.preventDefault()
@@ -598,6 +672,71 @@
 		setOpen(false)
 	}
 
+	// ------------------------------------------------- prose code highlighting
+
+	// A code block in the prose should look like the editor, not like a wall of
+	// grey. CodeMirror's `runMode` addon is the usual way to do that, but it is
+	// not vendored here, and the whole of it is the loop below: push a token,
+	// read past it, repeat.
+	function escapeHTML(s) {
+		return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+	}
+
+	function highlightV(text) {
+		if (typeof CodeMirror === 'undefined' || !CodeMirror.getMode) {
+			return null
+		}
+		var mode = CodeMirror.getMode({ name: 'vlang' })
+		if (!mode || typeof mode.token !== 'function') return null
+
+		var state = CodeMirror.startState(mode)
+		var out = ''
+		var pos = 0
+		var guard = 0
+
+		while (pos < text.length && guard < 200000) {
+			guard++
+			var stream = new CodeMirror.StringStream(text, pos)
+			// A blank line carries no token, so the mode is told to skip over it.
+			stream.lineStart = 0
+			var style = mode.token(stream, state) || null
+
+			if (stream.current() === '' || stream.pos === pos) {
+				// No progress means the mode cannot tokenise this position, which
+				// happens with an unterminated string. Emit one character and
+				// continue, so a broken block still renders its plain text.
+				out += escapeHTML(text.charAt(pos))
+				pos++
+				continue
+			}
+			out += '<span class="cm-' + style + '">' +
+				escapeHTML(text.slice(pos, stream.pos)) + '</span>'
+			pos = stream.pos
+		}
+		if (pos < text.length) out += escapeHTML(text.slice(pos))
+		return out
+	}
+
+	// Colour every `<pre><code>` in the page prose, once, and leave any that the
+	// mode cannot handle as plain text.
+	function initProseCode() {
+		var blocks = document.querySelectorAll('.slide-content pre > code')
+		if (!blocks.length) return
+		for (var i = 0; i < blocks.length; i++) {
+			var code = blocks[i]
+			if (code.getAttribute('data-hl')) continue
+			var text = code.textContent.replace(/\n$/, '')
+			var html = highlightV(text)
+			if (html === null) continue
+			code.setAttribute('data-hl', '1')
+			code.innerHTML = html
+			// The theme classes live on the editor root, so a highlighted block
+			// gets them too, otherwise the tokens are coloured by `.cm-*` rules
+			// written against `.CodeMirror`.
+			code.className = code.className ? code.className + ' CodeMirror cm-s-vlang' : 'CodeMirror cm-s-vlang'
+		}
+	}
+
 	// ------------------------------------------------------------------ boot
 
 	function boot() {
@@ -607,6 +746,7 @@
 		initOutput()
 		initPager()
 		initSplitter()
+		initProseCode()
 
 		var el = document.getElementById('page-data')
 		if (!el) return

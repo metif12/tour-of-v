@@ -84,7 +84,7 @@ pub fn run(mut ctx veb.Context) veb.Result {
 	})
 }
 
-// format_code runs `v fmt` over the submitted program.
+// format_code formats a submitted program.
 pub fn format_code(mut ctx veb.Context) veb.Result {
 	if reason := too_big(&ctx) {
 		return ctx.json(FormatResponse{
@@ -92,14 +92,18 @@ pub fn format_code(mut ctx veb.Context) veb.Result {
 		})
 	}
 
-	formatted := runner.format(submitted_file(&ctx).body)
-	if formatted.trim_space() == '' {
-		// `v fmt` returns nothing both for an empty program and for one it
-		// refuses to parse. The browser keeps the learner's text either way.
+	submitted := submitted_file(&ctx)
+	formatted, reason := runner.format_body(submitted.name, submitted.body)
+	if reason != '' {
 		return ctx.json(FormatResponse{
-			error: 'Could not format this program.'
+			body:  submitted.body
+			error: reason
 		})
 	}
+	// An empty result is legitimate: an empty program formats to an empty
+	// program, and so does one the formatter reduced to nothing. The browser
+	// keeps what it already had when `body` is empty, so this is not a failure
+	// and must not be reported as one.
 	return ctx.json(FormatResponse{
 		body: formatted
 	})

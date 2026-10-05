@@ -54,6 +54,9 @@ pub fn moretypes() Module {
 					Page{
 						title: 'Congratulations!'
 						body:  mt_done
+						code:  Example{
+							files: [moretypes_done_file]
+						}
 					},
 				]
 			},
@@ -64,6 +67,13 @@ pub fn moretypes() Module {
 const structs_file = CodeFile{
 	name: 'structs.v'
 	body: $embed_file('examples/structs.v').to_string()
+}
+
+// The closing page uses a struct, an array, a slice and a map together, so the
+// code panel stays on the page and exercises the lesson it closes.
+const moretypes_done_file = CodeFile{
+	name: 'moretypes_done.v'
+	body: $embed_file('examples/moretypes_done.v').to_string()
 }
 
 const arrays_file = CodeFile{

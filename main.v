@@ -8,7 +8,12 @@ import runner
 import tour
 import veb
 
-const port = 8080
+// port is where the server listens.
+//
+// Overridable so a second copy can be started alongside a running one, which is
+// what makes it possible to check a build without taking the live instance down.
+// The variable is read once at startup and nothing else changes it.
+const default_port = 8080
 
 // App is the veb application.
 //
@@ -72,7 +77,23 @@ fn main() {
 	}
 	app.handle_static('static', true) or { eprintln('[tour] static: ${err.msg()}') }
 
-	veb.run[App, Context](mut app, port)
+	veb.run[App, Context](mut app, listen_port())
+}
+
+// listen_port is the port to bind, from TOUR_PORT when it is set.
+//
+// A value that is not a number in range is ignored rather than fatal, so a typo
+// in the environment falls back to the default instead of refusing to start.
+fn listen_port() int {
+	raw := os.getenv('TOUR_PORT')
+	if raw == '' {
+		return default_port
+	}
+	n := raw.int()
+	if n > 0 && n < 65536 {
+		return n
+	}
+	return default_port
 }
 
 // index sends a first time visitor to the first page of the tour.
@@ -157,11 +178,16 @@ pub fn (mut app App) page(mut ctx Context, slug string, number int) veb.Result {
 	// The toolbar sits above the editor, the way play.vlang.io puts its tools
 	// above the editors and its terminal below them.
 	has_tools := has_code
-	// Format is only offered when it can actually work. `v fmt` builds its own
-	// helper tool, and that cannot be done inside the sandbox the tour runs
-	// untrusted code in, so today this is always false. It is kept as a flag
-	// rather than deleted so restoring the button is a one line change.
-	has_format := false
+	// Format works: it formats in process, with the same formatter `v fmt` uses,
+	// so there is nothing in a sandbox and nothing to build. See runner/format.v
+	// for why that matters and what the risk is.
+	has_format := has_code
+	// Standard input is not offered yet. The field and the limit are in place, but
+	// the sandbox has no working way to hand input to a program, so showing the
+	// tab would promise something the run does not deliver. This is the one switch
+	// to flip once the transport works. See runner/format.v's sibling note in
+	// runner/runner.v.
+	has_stdin := false
 	prev_page := page_data.prev
 	next_page := page_data.next
 	has_prev := prev_page.slug != ''
