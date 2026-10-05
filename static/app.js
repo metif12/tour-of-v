@@ -622,10 +622,44 @@
 		}
 	}
 
+	// -------------------------------------------------------------- language
+
+	// The switcher is rendered by the server, because the veb template
+	// compiler will not take a conditional inside a loop and each entry needs
+	// one. All this does is open and close it, and keep it from staying open
+	// when the table of contents opens.
+	function initLang() {
+		var button = document.getElementById('lang-toggle')
+		var menu = document.getElementById('lang-menu')
+		if (!button || !menu) return
+
+		function setOpen(open) {
+			menu.hidden = !open
+			button.setAttribute('aria-expanded', open ? 'true' : 'false')
+		}
+
+		button.addEventListener('click', function (e) {
+			e.stopPropagation()
+			setOpen(menu.hidden)
+		})
+
+		document.addEventListener('click', function (e) {
+			if (!menu.hidden && !menu.contains(e.target)) setOpen(false)
+		})
+
+		document.addEventListener('keydown', function (e) {
+			if (e.key === 'Escape' && !menu.hidden) {
+				setOpen(false)
+				button.focus()
+			}
+		})
+
+		setOpen(false)
+	}
+
 	// ------------------------------------------------------------------- help
 
-	function initHelp() {
-		var button = document.getElementById('help-toggle')
+	function initHelp() {		var button = document.getElementById('help-toggle')
 		var panel = document.getElementById('help-panel')
 		var overlay = document.getElementById('help-overlay')
 		var close = document.getElementById('help-close')
@@ -742,6 +776,7 @@
 	function boot() {
 		initTheme()
 		initToc()
+		initLang()
 		initHelp()
 		initOutput()
 		initPager()

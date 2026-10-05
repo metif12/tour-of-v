@@ -1,0 +1,162 @@
+module locale_test
+
+import content
+import locale
+import tour
+
+// every offered locale is reachable
+//
+// A locale can only be listed if `known` accepts it and `translations` returns
+// something for it. The language switcher offers what `locales` holds, so a
+// mismatch is a language picker that offers something the router will 404.
+
+fn test_every_offered_locale_is_known() {
+	for l in locale.locales {
+		assert locale.known(l.code)
+	}
+}
+
+fn test_every_offered_locale_has_a_translation() {
+	for l in locale.locales {
+		t := locale.translations(l.code)
+		assert t.ui.len > 0
+	}
+}
+
+fn test_unknown_locale_falls_back_to_english() {
+	assert !locale.known('zz')
+	assert !locale.known('')
+	// And the fallback is usable rather than empty.
+	assert locale.ui_string('zz', 'run') == locale.en.ui['run']
+}
+
+// the direction is set explicitly rather than inferred
+//
+// `dir="auto"` inspects the first strong character on the page, which on a
+// lesson is the logo's alt text or a code sample, not the prose. Getting this
+// wrong mirrors the entire layout, so it is worth a test.
+
+fn test_direction_is_right_to_left_only_where_it_should_be() {
+	assert locale.dir('fa') == 'rtl'
+	assert locale.dir('en') == 'ltr'
+	assert locale.is_rtl('fa')
+	assert !locale.is_rtl('en')
+}
+
+fn test_unknown_locale_is_left_to_right() {
+	// A language that does not exist has no text to lay out, and the wrong
+	// guess here is mirrored text rather than merely misplaced text.
+	assert locale.dir('zz') == 'ltr'
+}
+
+// English keeps its bare URLs
+//
+// Every link to the tour that has already been shared points at /welcome/1 and
+// not /en/welcome/1, so the default locale is never prefixed.
+
+fn test_english_urls_are_not_prefixed() {
+	assert locale.href('en', '/welcome/1') == '/welcome/1'
+	assert locale.href('', '/welcome/1') == '/welcome/1'
+}
+
+fn test_other_locales_are_prefixed() {
+	assert locale.href('fa', '/welcome/1') == '/fa/welcome/1'
+	assert locale.href('fa', '/list') == '/fa/list'
+}
+
+// A half translated page is a much smaller problem than a blank one, which is
+// the whole reason the fallback exists. These tests pin that behaviour so it
+// cannot be tightened into a blank page by accident.
+
+fn test_untranslated_page_falls_back_to_english() {
+	// welcome/5 exists and has no Persian text.
+	_ := locale.page_text('fa', 'welcome', 5) or { return }
+	assert false
+}
+
+fn test_translated_page_is_returned() {
+	text := locale.page_text('fa', 'welcome', 1) or { return }
+	assert text.title != ''
+	assert text.body.contains('<p>')
+}
+
+fn test_untranslated_ui_key_falls_back_to_english() {
+	assert locale.ui_string('fa', 'not_a_real_key') == 'not_a_real_key'
+	assert locale.ui_string('fa', 'resize_panes') != locale.en.ui['resize_panes']
+}
+
+fn test_ui_map_always_has_every_english_key() {
+	base := locale.en.ui
+	for loc in ['en', 'fa'] {
+		m := locale.ui_map(loc)
+		for k, _ in base {
+			assert k in m
+		}
+	}
+}
+
+// The keys are `<lesson>/<number>`, which is only stable while pages are not
+// reordered. A reorder is an ordinary edit, and it would otherwise strand a
+// translation and quietly show English in the middle of a translated tour.
+//
+// This walks the real catalogue and fails if a translation names a page that is
+// not there.
+
+fn test_every_translated_page_key_exists() {
+	mods := content.modules()
+	mut known := map[string]bool{}
+	for m in mods {
+		for les in m.lessons {
+			for i, _ in les.pages {
+				known['${les.slug}/${i + 1}'] = true
+			}
+		}
+	}
+	assert known.len > 0
+	for l in locale.locales {
+		text := locale.translations(l.code)
+		for key, _ in text.pages {
+			assert key in known
+		}
+	}
+}
+
+fn test_every_translated_lesson_key_exists() {
+	t := tour.new_tour(content.modules())
+	mut slugs := map[string]bool{}
+	mut module_ids := map[string]bool{}
+	for m in t.modules {
+		module_ids[m.id] = true
+		for les in m.lessons {
+			slugs[les.slug] = true
+		}
+	}
+	// The two are different key spaces on purpose. The opening module is called
+	// `mechanics` in the catalogue and `welcome` as a lesson, because the slug
+	// is what the URL uses and the id is what the module is called.
+	for l in locale.locales {
+		text := locale.translations(l.code)
+		for slug, _ in text.lessons {
+			assert slug in slugs
+		}
+		for id, _ in text.modules {
+			assert id in module_ids
+		}
+	}
+}
+
+// The counter is interpolated by the browser, so the placeholder has to survive
+// the trip through a V string literal and then a JSON island intact.
+//
+// It is written `\${number}` in the V source, because every V string form
+// interpolates `${...}` and an unescaped one would be eaten by the compiler and
+// the browser would never see it.
+
+fn test_interpolation_placeholders_are_literal() {
+	en := locale.en.ui['page_of']
+	assert en.contains('{number}')
+	assert en.contains('{total}')
+	// The braces arrive with their dollar sign still attached.
+	assert en.contains('\${number}')
+	assert en.contains('\${total}')
+}

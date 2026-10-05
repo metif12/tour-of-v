@@ -255,16 +255,20 @@ pre {
 .toc {
 	position: fixed;
 	top: 0;
-	left: 0;
+	inset-inline-start: 0;
 	bottom: 0;
 	width: 340px;
 	max-width: 85vw;
 	background: var(--aside-bg);
-	border-right: 1px solid var(--aside-border);
+	border-inline-end: 1px solid var(--aside-border);
 	overflow-y: auto;
 	padding: 16px;
 	z-index: 40;
 	box-shadow: 2px 0 16px rgba(0, 0, 0, 0.12);
+
+[dir="rtl"] .toc {
+	box-shadow: -2px 0 16px rgba(0, 0, 0, 0.12);
+}
 }
 
 .toc[hidden] {
@@ -310,7 +314,7 @@ pre {
 
 .toc-lesson ol {
 	margin: 4px 0 8px;
-	padding-left: 18px;
+	padding-inline-start: 18px;
 }
 
 .toc-lesson li {
@@ -408,7 +412,7 @@ pre {
 
 .slide-content ul {
 	margin: 0 0 14px;
-	padding-left: 22px;
+	padding-inline-start: 22px;
 }
 
 /* pager */
@@ -463,7 +467,7 @@ pre {
 	/* The floating toolbar is positioned against this pane, not the viewport.
 	   Without this it lands in the page header instead. */
 	position: relative;
-	border-left: 1px solid var(--code-border);
+	border-inline-start: 1px solid var(--code-border);
 	background: var(--code-bg);
 }
 
@@ -541,7 +545,12 @@ pre {
    It stays on the right in every language. A right to left page mirrors its
    words, not its tools: the run button belongs where the reader's hand already
    is, and flipping it into the corner the language does not start from is a
-   small cost paid on every single run. */
+   small cost paid on every single run.
+
+   Hence a physical `right` rather than the `inset-inline-end` an earlier
+   version used. The logical property looks right until you remember that
+   resolving it against a right to left page moves the toolbar to the left,
+   which is the one thing this rule exists to prevent. */
 .file-menu {
 	position: absolute;
 	top: 10px;
@@ -640,6 +649,15 @@ pre {
 	flex: 0 0 auto;
 	display: flex;
 	background: var(--code-bg);
+}
+
+.io-tabs {
+	/* Pushed to the right edge with a physical margin rather than a logical
+	   one. A logical `margin-inline-start: auto` reads more naturally and is
+	   wrong here: it would move the tabs to the left in a right to left page,
+	   while the toolbar above stays on the right in every language. The two are
+	   meant to line up. */
+	margin-left: auto;
 }
 
 .io-tab {
@@ -762,7 +780,7 @@ pre {
 
 .help-panel {
 	position: fixed;
-	right: 24px;
+	inset-inline-end: 24px;
 	bottom: 24px;
 	width: 320px;
 	max-width: calc(100vw - 32px);
@@ -879,8 +897,8 @@ pre {
 
 .list-lesson {
 	margin-bottom: 20px;
-	padding-left: 14px;
-	border-left: 2px solid var(--border);
+	padding-inline-start: 14px;
+	border-inline-start: 2px solid var(--border);
 }
 
 .list-lesson h3 {
@@ -896,7 +914,7 @@ pre {
 
 .lesson-pages {
 	margin: 0;
-	padding-left: 22px;
+	padding-inline-start: 22px;
 	font-size: 14px;
 }
 
@@ -1061,7 +1079,7 @@ pre.CodeMirror {
 	}
 
 	.code-pane {
-		border-left: 0;
+		border-inline-start: 0;
 		border-top: 1px solid var(--border);
 	}
 
@@ -1076,4 +1094,115 @@ pre.CodeMirror {
 	.editor-wrap .CodeMirror {
 		height: 100%;
 	}
+}
+/* ------------------------------------------------------------------- i18n */
+/*
+ * Direction handling.
+ *
+ * `dir` is set on <html> from the locale rather than left to `auto`, because
+ * `auto` only looks at the first strong character on the page, and on a lesson
+ * that is the logo's alt text or a line of code rather than the prose.
+ *
+ * The rule that matters most: **code is never mirrored.** A V program reads
+ * left to right in every language, so the editor, the toolbar, the output panel
+ * and the sample blocks in the prose are all pinned back to ltr whatever the
+ * surrounding page direction is. Only the words around them move.
+ *
+ * The physical properties above that relate to the chrome were converted to
+ * logical ones, so a right to left locale mirrors them. The four that stay
+ * physical are deliberate and are listed here so nobody "fixes" them later:
+ * the CodeMirror line inset, the gutter inset, the gutter border and the caret.
+ */
+
+/* Only what is genuinely code is pinned to ltr.
+ *
+ * An earlier version pinned `.code-pane` and `.file-menu` as well, which was
+ * wrong twice over: the editor's own content needed pinning, not its container,
+ * and pinning the toolbar fixed its position by accident, which then looked like
+ * a reason to keep logical insets everywhere. The toolbar now names `right`
+ * outright and the tab strip names `margin-left`, so neither depends on the page
+ * direction.
+ */
+[dir="rtl"] .editor-wrap,
+[dir="rtl"] .output,
+[dir="rtl"] .file-tabs {
+	direction: ltr;
+}
+
+[dir="rtl"] .slide-content pre,
+[dir="rtl"] .slide-content p code,
+[dir="rtl"] .slide-content li code {
+	direction: ltr;
+	text-align: left;
+	unicode-bidi: isolate;
+}
+
+/* A number stays Latin in every locale, and so does a file name or a shortcut. */
+[dir="rtl"] .counter,
+[dir="rtl"] .file-tab,
+[dir="rtl"] .help-keys {
+	direction: ltr;
+	unicode-bidi: isolate;
+}
+
+/* --------------------------------------------------------- language menu */
+
+.top-bar {
+	position: relative;
+}
+
+.lang-menu {
+	position: absolute;
+	inset-inline-end: 8px;
+	top: calc(100% - 6px);
+	z-index: 46;
+	min-width: 200px;
+	max-height: 70vh;
+	overflow-y: auto;
+	padding: 6px;
+	border: 1px solid var(--help-panel-border);
+	border-radius: 10px;
+	background: var(--help-panel-bg);
+	box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.28);
+}
+
+.lang-menu[hidden] {
+	display: none;
+}
+
+.lang-item {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 14px;
+	padding: 7px 10px;
+	border-radius: 6px;
+	color: var(--help-panel-fg);
+	font-size: 14px;
+}
+
+.lang-item:hover {
+	background: var(--menu-hover);
+	text-decoration: none;
+}
+
+.lang-item.current {
+	background: var(--bg-sunken);
+	font-weight: 600;
+}
+
+/* The endonym is what a reader recognises. The English name beside it is the
+   tiebreak for someone looking for a language they cannot yet read in that
+   script. */
+.lang-native {
+	font-size: 15px;
+}
+
+.lang-item[dir="rtl"] .lang-native {
+	font-size: 16px;
+}
+
+.lang-name {
+	color: var(--fg-muted);
+	font-size: 12px;
 }

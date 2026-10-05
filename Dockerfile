@@ -72,6 +72,7 @@ COPY v.mod ./
 COPY main.v view.v ./
 COPY api/ api/
 COPY content/ content/
+COPY locale/ locale/
 COPY runner/ runner/
 COPY tour/ tour/
 # veb resolves its HTML templates while compiling, so these are build inputs
