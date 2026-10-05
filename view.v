@@ -3,6 +3,7 @@ module main
 import strings
 import tour
 import content
+import locale
 
 // The templates cannot compute, so everything a template needs is prepared
 // here as plain data.
@@ -33,10 +34,15 @@ pub:
 // It is serialised once into a JSON island in the page rather than read back
 // out of the DOM, so what the editor is given is exactly what the server
 // holds.
+//
+// `locale` is carried in the data rather than only in the URL, because the
+// browser needs it to decide the direction of code and to label the language
+// it is currently showing.
 pub struct PageData {
 pub:
 	module_id string
 	lesson    string
+	locale    string
 	title     string
 	number    int
 	total     int
@@ -61,24 +67,59 @@ pub:
 // The trade-off is that this markup is built by string concatenation rather than
 // by a template. It is trusted content compiled into the binary, never visitor
 // input, so there is nothing to escape here.
-pub fn build_toc(t &tour.Tour) string {
+//
+// `loc` is the locale to render titles in. Translations are applied here rather
+// than by rewriting the tour, because the tour is shared by every concurrent
+// request and mutating it to suit one language would be a data race.
+pub fn build_toc(t &tour.Tour, loc string) string {
 	mut sb := strings.new_builder(4096)
 	for mod in t.modules {
-		sb.write_string('<h2 class="toc-module-title">${mod.title}</h2>')
-		sb.write_string('<div class="toc-desc">${mod.description}</div>')
+		module_title := locale.module_title(loc, mod.id, mod.title)
+		sb.write_string('<h2 class="toc-module-title">${module_title}</h2>')
+		sb.write_string('<div class="toc-desc">${locale.lesson_title(loc, mod.id, mod.description)}</div>')
 		for lesson in mod.lessons {
 			sb.write_string('<div class="toc-lesson" data-slug="${lesson.slug}">')
-			sb.write_string('<a class="toc-lesson-link" href="/${lesson.slug}/1">${lesson.title}</a>')
+			sb.write_string('<a class="toc-lesson-link" href="${locale.href(loc, '/${lesson.slug}/1')}">${locale.lesson_title(loc, lesson.slug, lesson.title)}</a>')
 			sb.write_string('<div class="toc-lesson-desc">${lesson.description}</div>')
 			sb.write_string('<ol class="toc-pages">')
 			for i, page in lesson.pages {
 				number := i + 1
-				sb.write_string('<li><a href="/${lesson.slug}/${number}">${page.title}</a></li>')
+				title := page_title(loc, lesson.slug, number, page.title)
+				sb.write_string('<li><a href="${locale.href(loc, '/${lesson.slug}/${number}')}">${title}</a></li>')
 			}
 			sb.write_string('</ol></div>')
 		}
 	}
 	return sb.str()
+}
+
+// page_title returns a page's title in the requested locale.
+//
+// Kept as its own function because the page view and the table of contents both
+// need it, and they must agree: a title in the sidebar that differs from the
+// heading on the page is the kind of inconsistency nobody notices until it is
+// pointed out.
+pub fn page_title(loc string, lesson string, number int, english string) string {
+	if loc == '' || loc == locale.default_locale {
+		return english
+	}
+	text := locale.page_text(loc, lesson, number) or { return english }
+	if text.title == '' {
+		return english
+	}
+	return text.title
+}
+
+// page_body returns a page's body in the requested locale.
+pub fn page_body(loc string, lesson string, number int, english string) string {
+	if loc == '' || loc == locale.default_locale {
+		return english
+	}
+	text := locale.page_text(loc, lesson, number) or { return english }
+	if text.body == '' {
+		return english
+	}
+	return text.body
 }
 
 // view_files converts embedded example files into editor files.
@@ -93,14 +134,20 @@ fn view_files(files []content.CodeFile) []ViewFile {
 	return out
 }
 
-// view_link converts a navigation target, or produces an empty link when
+// link_view converts a navigation target, or produces an empty link when
 // there is none.
-fn view_link(ref ?tour.PageRef) ViewLink {
+//
+// It is the only one of the two, because a pager that reads "previous" in the
+// language you are reading is the whole point: a translated page whose pager
+// drops you into English halfway through the tour is worse than an untranslated
+// one. The title is translated and the slug is left alone, so the URL stays
+// language neutral and the same page is reachable from either language.
+pub fn link_view(ref ?tour.PageRef, loc string) ViewLink {
 	p := ref or { return ViewLink{} }
 	return ViewLink{
 		slug:   p.lesson.slug
 		number: p.number
-		label:  p.page.title
+		label:  page_title(loc, p.lesson.slug, p.number, p.page.title)
 	}
 }
 

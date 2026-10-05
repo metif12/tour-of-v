@@ -4,15 +4,17 @@
 			@veb.raw(page_data.body)
 		</div>
 
-		<nav class="pager" aria-label="Page navigation">
+		<nav class="pager" aria-label="@ui_prev">
 			@if has_prev
-				<a class="prev-page" rel="prev" href="/@prev_page.slug/@prev_page.number">&lt;</a>
+				<a class="prev-page" rel="prev" href="@lang_prefix/@prev_page.slug/@prev_page.number"
+					aria-label="@ui_prev">&lt;</a>
 			@else
 				<span class="prev-page disabled">&lt;</span>
 			@end
-			<span class="counter">@ref.number / @ref.total</span>
+			<span class="counter">@counter</span>
 			@if has_next
-				<a class="next-page" rel="next" href="/@next_page.slug/@next_page.number">&gt;</a>
+				<a class="next-page" rel="next" href="@lang_prefix/@next_page.slug/@next_page.number"
+					aria-label="@ui_next">&gt;</a>
 			@else
 				<span class="next-page disabled">&gt;</span>
 			@end
@@ -21,7 +23,7 @@
 
 	@if has_code
 		<div class="splitter" id="splitter" role="separator" aria-orientation="vertical"
-			tabindex="0" aria-label="Resize panes"></div>
+			tabindex="0" aria-label="@ui_resize"></div>
 
 		<div class="code-pane" id="code-pane">
 			@if has_files_tabs
@@ -38,15 +40,15 @@
 
 			@if has_tools
 				<div class="file-menu" id="file-menu">
-					<a href="#" id="run" class="menu-button icon-button" title="Run (Shift+Enter)"
-						aria-label="Run">
+<a href="#" id="run" class="menu-button icon-button"
+						title="@ui_run (Shift+Enter)" aria-label="@ui_run">
 						<svg viewBox="0 0 16 16" aria-hidden="true" class="icon-play">
 							<path d="M4 2.5v11l9-5.5z" fill="currentColor" />
 						</svg>
 					</a>
 					@if has_format
 						<a href="#" id="format" class="menu-button icon-button"
-							title="Format (Ctrl+Enter)" aria-label="Format">
+							title="@ui_format (Ctrl+Enter)" aria-label="@ui_format">
 							<svg viewBox="0 0 16 16" aria-hidden="true">
 								<path d="M2 3h12M2 6.5h8M2 10h12M2 13.5h6" stroke="currentColor"
 									stroke-width="1.6" fill="none" stroke-linecap="round" />
@@ -56,7 +58,7 @@
 						</a>
 					@end
 					<a href="#" id="reset" class="menu-button icon-button"
-						title="Reset to the original" aria-label="Reset">
+						title="@ui_reset" aria-label="@ui_reset">
 						<svg viewBox="0 0 16 16" aria-hidden="true">
 							<path d="M13 8a5 5 0 1 1-1.6-3.7" stroke="currentColor" stroke-width="1.6"
 								fill="none" stroke-linecap="round" />
@@ -66,7 +68,7 @@
 					</a>
 					@if has_solution
 						<a href="#" id="solution" class="menu-button icon-button"
-							title="Show the solution" aria-label="Solution">
+							title="@ui_solution" aria-label="@ui_solution">
 							<svg viewBox="0 0 16 16" aria-hidden="true">
 								<path d="M6.5 3.2a2 2 0 0 1 3 0l.4.5h1.3a1.5 1.5 0 0 1 1.5 1.5v6.3a1.5 1.5 0 0 1-1.5 1.5H4.8a1.5 1.5 0 0 1-1.5-1.5V5.2A1.5 1.5 0 0 1 4.8 3.7h1.3z"
 									stroke="currentColor" stroke-width="1.4" fill="none"
@@ -97,7 +99,7 @@
 							<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none"
 								stroke-linecap="round" stroke-linejoin="round" />
 						</svg>
-						<span>Output</span>
+						<span>@ui_output</span>
 					</button>
 				</div>
 				@if has_stdin

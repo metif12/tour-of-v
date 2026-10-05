@@ -3,8 +3,10 @@ module main
 import api
 import json2
 import content
+import locale
 import os
 import runner
+import strings
 import tour
 import veb
 
@@ -105,10 +107,30 @@ pub fn (mut app App) index(mut ctx Context) veb.Result {
 // list renders the table of contents.
 @[get]
 pub fn (mut app App) list(mut ctx Context) veb.Result {
-	title := 'A Tour of V'
-	toc := build_toc(app.tour)
-	veb_content := $tmpl('templates/list.html')
-	return $veb.html('templates/base.html')
+	return render_list(mut ctx, app.tour, locale.default_locale)
+}
+
+// localized_list renders the table of contents in another language.
+//
+// Declared before `/:slug/:number` on purpose. veb matches routes in
+// declaration order and the first match wins, and `/fa/list` has the same shape
+// as a lesson page, so without this the list would be read as a lesson called
+// `fa` with page number zero.
+@['/:code/list'; get]
+pub fn (mut app App) localized_list(mut ctx Context, code string) veb.Result {
+	if !locale.known(code) {
+		return ctx.not_found()
+	}
+	return render_list(mut ctx, app.tour, code)
+}
+
+// locale_root sends /fa to the first page in that language.
+@['/:code'; get]
+pub fn (mut app App) locale_root(mut ctx Context, code string) veb.Result {
+	if !locale.known(code) || code == locale.default_locale {
+		return ctx.not_found()
+	}
+	return ctx.redirect('/${code}/welcome/1')
 }
 
 // The API routes are literal paths and are declared before the one
@@ -150,23 +172,54 @@ pub fn (mut app App) api_version(mut ctx Context) veb.Result {
 // string, integer or bool, which is why `number` arrives as an int.
 @['/:slug/:number'; get]
 pub fn (mut app App) page(mut ctx Context, slug string, number int) veb.Result {
-	ref := app.tour.resolve(slug, number) or { return ctx.not_found() }
+	return render_page(mut ctx, app.tour, locale.default_locale, slug, number)
+}
 
-	title := '${ref.page.title} - A Tour of V'
-	toc := build_toc(app.tour)
+// localized_page renders one lesson page in another language.
+//
+// Three segments, so it cannot collide with the two segment English route.
+@['/:code/:lesson/:number'; get]
+pub fn (mut app App) localized_page(mut ctx Context, code string, lesson string, number int) veb.Result {
+	if !locale.known(code) {
+		return ctx.not_found()
+	}
+	return render_page(mut ctx, app.tour, code, lesson, number)
+}
+
+// render_list renders the table of contents in one language.
+fn render_list(mut ctx Context, t &tour.Tour, loc string) veb.Result {
+	title := locale.ui_string(loc, 'site_title')
+	toc := build_toc(t, loc)
+	veb_content := $tmpl('templates/list.html')
+	return render_base(mut ctx, loc, title, toc, '/list', veb_content)
+}
+
+// render_page renders one lesson page in one language.
+//
+// The English and prefixed routes both land here, so a translated page cannot
+// drift from the English one: there is one place that builds the view.
+fn render_page(mut ctx Context, t &tour.Tour, loc string, slug string, number int) veb.Result {
+	ref := t.resolve(slug, number) or { return ctx.not_found() }
+
+	heading := page_title(loc, ref.lesson.slug, ref.number, ref.page.title)
+	prose := page_body(loc, ref.lesson.slug, ref.number, ref.page.body)
+	title := '${heading} - ${locale.ui_string(loc, 'site_title')}'
+	toc := build_toc(t, loc)
+	path := '/${slug}/${number}'
 
 	example := ref.page.code or { content.Example{} }
 	page_data := PageData{
 		module_id: ref.module_id
 		lesson:    ref.lesson.slug
-		title:     ref.page.title
+		locale:    loc
+		title:     heading
 		number:    ref.number
 		total:     ref.total
-		body:      ref.page.body
+		body:      prose
 		files:     view_files(example.files)
 		solution:  view_files(example.solution)
-		prev:      view_link(app.tour.prev(ref))
-		next:      view_link(app.tour.next(ref))
+		prev:      link_view(t.prev(ref), loc)
+		next:      link_view(t.next(ref), loc)
 	}
 	page_json := embed_json(json2.encode(page_data))
 
@@ -185,23 +238,173 @@ pub fn (mut app App) page(mut ctx Context, slug string, number int) veb.Result {
 	// Standard input is not offered yet. The field and the limit are in place, but
 	// the sandbox has no working way to hand input to a program, so showing the
 	// tab would promise something the run does not deliver. This is the one switch
-	// to flip once the transport works. See runner/format.v's sibling note in
-	// runner/runner.v.
+	// to flip once the transport works. See the note on `runner.run`.
 	has_stdin := false
-	prev_page := page_data.prev
+	prev_page := link_view(t.prev(ref), loc)
 	next_page := page_data.next
 	has_prev := prev_page.slug != ''
 	has_next := next_page.slug != ''
 
+	// The lesson template needs the page chrome strings too, not just base.html.
+	// veb resolves a template variable from the enclosing function at the point
+	// the template is expanded, so these have to be in scope before $tmpl and
+	// cannot simply be inherited from render_base.
+	u := ui_for(loc)
+	counter := counter_text(loc, ref.number, ref.total)
+	lang_prefix := if loc == locale.default_locale { '' } else { '/' + loc }
+	ui_run := u.run
+	ui_format := u.format
+	ui_reset := u.reset
+	ui_solution := u.solution
+	ui_output := u.output
+	ui_prev := u.prev_page
+	ui_next := u.next_page
+	ui_resize := u.resize
+
 	veb_content := $tmpl('templates/page.html')
+	return render_base(mut ctx, loc, title, toc, path, veb_content)
+}
+
+// UiStrings is the interface text one request needs, already resolved for a
+// locale.
+//
+// It is a struct rather than a map because veb resolves a template variable
+// from the enclosing function, so the names have to be spelled out somewhere.
+// One struct with one constructor keeps the page view and the shared chrome
+// from drifting into showing two different languages.
+struct UiStrings {
+pub mut:
+	site        string
+	toc         string
+	theme       string
+	help        string
+	help_close  string
+	language    string
+	run         string
+	format      string
+	reset       string
+	solution    string
+	output      string
+	resize      string
+	prev        string
+	next        string
+	run_program string
+	next_page   string
+	prev_page   string
+	toggle_help string
+	move_panes  string
+	not_found   string
+}
+
+// ui_for resolves the interface catalogue for a locale.
+fn ui_for(loc string) UiStrings {
+	return UiStrings{
+		site:        locale.ui_string(loc, 'site_title')
+		toc:         locale.ui_string(loc, 'toc')
+		theme:       locale.ui_string(loc, 'toggle_theme')
+		help:        locale.ui_string(loc, 'help')
+		help_close:  locale.ui_string(loc, 'help_close')
+		language:    locale.ui_string(loc, 'language')
+		run:         locale.ui_string(loc, 'run')
+		format:      locale.ui_string(loc, 'format')
+		reset:       locale.ui_string(loc, 'reset')
+		solution:    locale.ui_string(loc, 'solution')
+		output:      locale.ui_string(loc, 'output')
+		resize:      locale.ui_string(loc, 'resize_panes')
+		prev:        locale.ui_string(loc, 'previous')
+		next:        locale.ui_string(loc, 'next')
+		run_program: locale.ui_string(loc, 'run_program')
+		next_page:   locale.ui_string(loc, 'next_page')
+		prev_page:   locale.ui_string(loc, 'prev_page')
+		toggle_help: locale.ui_string(loc, 'toggle_help')
+		move_panes:  locale.ui_string(loc, 'move_panes')
+		not_found:   locale.ui_string(loc, 'not_found_title')
+	}
+}
+
+// counter_text renders the page counter for a locale.
+//
+// The catalogue stores `${number} / ${total}` so a translator can reorder it,
+// which is why Persian can say "۱ از ۵" rather than "1 / 5". The placeholders are
+// substituted rather than interpolated because V would have eaten a literal
+// `${` when the catalogue was compiled, so the dollar sign is put back here.
+fn counter_text(loc string, number int, total int) string {
+	mut s := locale.ui_string(loc, 'page_of')
+	s = s.replace('$' + '{number}', number.str())
+	s = s.replace('$' + '{total}', total.str())
+	return s
+}
+
+// render_base fills in everything base.html needs and returns it.
+//
+// base.html is shared by the lesson page, the table of contents and the 404, so
+// the language, the direction and the interface strings are resolved once here
+// rather than at each call site.
+//
+// The interface strings are passed to the template as named variables rather
+// than as a map it indexes, because that is what the veb template compiler in
+// this V version is reliable at. The whole catalogue still goes to the browser
+// as a JSON island, since app.js needs the strings it builds at runtime.
+fn render_base(mut ctx Context, loc string, title string, toc string, path string, veb_content string) veb.Result {
+	lang := loc
+	dir := locale.dir(loc)
+	ui := locale.ui_map(loc)
+	locales := locale_choices(loc, path)
+	u := ui_for(loc)
+	ui_site := u.site
+	ui_toc := u.toc
+	ui_theme := u.theme
+	ui_help := u.help
+	ui_help_close := u.help_close
+	ui_run := u.run_program
+	ui_next := u.next_page
+	ui_prev := u.prev_page
+	ui_toggle_help := u.toggle_help
+	ui_panes := u.move_panes
+	ui_language := u.language
+	// The logo link needs the locale prefix inline in the template, which is
+	// simpler than giving the template a path to prefix.
+	lang_prefix := if loc == locale.default_locale { '' } else { '/' + loc }
+	ui_json := embed_json(json2.encode(ui))
 	return $veb.html('templates/base.html')
 }
 
+// locale_choices renders the language switcher.
+//
+// Built in V rather than in the template for the same reason the table of
+// contents is: the veb template compiler will not take a conditional inside a
+// loop, and each entry needs one.
+//
+// `path` is the page the visitor is on, without a locale prefix, so switching
+// language keeps them where they were rather than dropping them on the front
+// page.
+fn locale_choices(current string, path string) string {
+	mut sb := strings.new_builder(1024)
+	sb.write_string('<div class="lang-menu" id="lang-menu" hidden role="menu">')
+	for l in locale.locales {
+		if l.code == current {
+			sb.write_string('<a class="lang-item current" href="${locale.href(l.code, path)}" aria-current="true" lang="${l.code}" dir="${locale.dir(l.code)}">')
+		} else {
+			sb.write_string('<a class="lang-item" href="${locale.href(l.code, path)}" lang="${l.code}" dir="${locale.dir(l.code)}">')
+		}
+		sb.write_string('<span class="lang-native">${l.native}</span>')
+		sb.write_string('<span class="lang-name">${l.name}</span>')
+		sb.write_string('</a>')
+	}
+	sb.write_string('</div>')
+	return sb.str()
+}
+
 // not_found renders the 404 page for an unmatched URL.
+//
+// It goes through render_base like every other page so that a 404 in Persian is
+// still Persian, and still offers the language switcher. The tour is not
+// reachable from a bare context, so the table of contents is left empty rather
+// than guessed at.
 pub fn (mut ctx Context) not_found() veb.Result {
 	ctx.res.set_status(.not_found)
 	title := 'Not found - A Tour of V'
 	toc := ''
 	veb_content := $tmpl('templates/not_found.html')
-	return $veb.html('templates/base.html')
+	return render_base(mut ctx, locale.default_locale, title, toc, '', veb_content)
 }

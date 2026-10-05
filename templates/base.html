@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="auto">
+<html lang="@lang" dir="@dir" data-theme="auto">
 
 <head>
 	<meta charset="utf-8">
@@ -18,19 +18,28 @@
 
 <body>
 	<header class="top-bar">
-		<a href="/welcome/1" class="logo-link">
+		<a href="/@lang_prefix welcome/1" class="logo-link">
 			<img src="/logo.svg" alt="" class="logo" width="26" height="26">
-			<span>A Tour of V</span>
+			<span>@ui_site</span>
 		</a>
 		<div class="right">
-			<button class="bar-button" id="toc-toggle" aria-label="Table of contents"
+			<button class="bar-button" id="toc-toggle" aria-label="@ui_toc"
 				aria-expanded="false">
 				<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
 					<path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2"
 						fill="none" stroke-linecap="round" />
 				</svg>
 			</button>
-			<button class="bar-button" id="help-toggle" aria-label="Keyboard shortcuts"
+			<button class="bar-button" id="lang-toggle" aria-label="@ui_language"
+				aria-expanded="false" aria-haspopup="true">
+				<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+					<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"
+						fill="none" />
+					<path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"
+						stroke="currentColor" stroke-width="2" fill="none" />
+				</svg>
+			</button>
+			<button class="bar-button" id="help-toggle" aria-label="@ui_help"
 				aria-expanded="false">
 				<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
 					<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"
@@ -40,7 +49,7 @@
 					<circle cx="12" cy="17.2" r="1.15" fill="currentColor" />
 				</svg>
 			</button>
-			<button class="bar-button" id="theme-toggle" aria-label="Toggle theme">
+			<button class="bar-button" id="theme-toggle" aria-label="@ui_theme">
 				<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
 					<circle cx="12" cy="12" r="4.5" fill="currentColor" />
 					<path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"
@@ -48,14 +57,20 @@
 				</svg>
 			</button>
 		</div>
+		@veb.raw(locales)
 	</header>
 
+	<div class="click-catcher" id="toc-catcher" hidden></div>
+	<nav class="toc" id="toc" hidden aria-label="@ui_toc">
+		@veb.raw(toc)
+	</nav>
+
 	<div class="help-overlay" id="help-overlay" hidden></div>
-	<div class="help-panel" id="help-panel" hidden role="dialog" aria-label="Keyboard shortcuts"
+	<div class="help-panel" id="help-panel" hidden role="dialog" aria-label="@ui_help"
 		aria-modal="false">
 		<div class="help-header">
-			<h3>Keyboard shortcuts</h3>
-			<button class="help-close" id="help-close" aria-label="Close">
+			<h3>@ui_help</h3>
+			<button class="help-close" id="help-close" aria-label="@ui_help_close">
 				<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
 					<path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2"
 						fill="none" stroke-linecap="round" />
@@ -63,36 +78,32 @@
 			</button>
 		</div>
 		<div class="help-shortcut">
-			<span class="help-desc">Run the program</span>
+			<span class="help-desc">@ui_run</span>
 			<span class="help-keys"><kbd>Shift</kbd> + <kbd>Enter</kbd></span>
 		</div>
 		<div class="help-shortcut">
-			<span class="help-desc">Next page</span>
+			<span class="help-desc">@ui_next</span>
 			<span class="help-keys"><kbd>PageDown</kbd></span>
 		</div>
 		<div class="help-shortcut">
-			<span class="help-desc">Previous page</span>
+			<span class="help-desc">@ui_prev</span>
 			<span class="help-keys"><kbd>PageUp</kbd></span>
 		</div>
 		<div class="help-shortcut">
-			<span class="help-desc">Open or close this help</span>
+			<span class="help-desc">@ui_toggle_help</span>
 			<span class="help-keys"><kbd>?</kbd></span>
 		</div>
 		<div class="help-shortcut">
-			<span class="help-desc">Move between panes</span>
+			<span class="help-desc">@ui_panes</span>
 			<span class="help-keys"><kbd>Tab</kbd></span>
 		</div>
 	</div>
-
-	<div class="click-catcher" id="toc-catcher" hidden></div>
-	<nav class="toc" id="toc" hidden aria-label="Table of contents">
-		@veb.raw(toc)
-	</nav>
 
 	<main id="content">
 		@veb.raw(veb_content)
 	</main>
 
+	<script type="application/json" id="ui-strings">@veb.raw(ui_json)</script>
 	<script src="/codemirror/lib/codemirror.js"></script>
 	<script src="/codemirror/mode/vlang/vlang.js"></script>
 	<script src="/app.js"></script>
