@@ -259,3 +259,9 @@ empty, or if the deliberately broken page stopped being broken.
 
 MIT, see [LICENSE](LICENSE). Third party code and assets keep their own
 licences, listed in [THIRD_PARTY.md](THIRD_PARTY.md).
+
+## Contributing
+
+`main` is kept deployable, and work happens on a short lived branch. The
+branching rules and the checks a change has to pass are in
+[CONTRIBUTING.md](CONTRIBUTING.md).
