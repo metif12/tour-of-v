@@ -195,6 +195,13 @@ code {
 	font-size: 0.9em;
 }
 
+/* An inline code span in a paragraph is a word or two, so it should not look
+   like a block of source. The `pre > code` case is handled further down by
+   `pre.CodeMirror`, once the block has been tokenised. */
+pre {
+	margin: 14px 0;
+}
+
 /* ------------------------------------------------------------------ top bar */
 
 .top-bar {
@@ -529,7 +536,12 @@ code {
 /* The toolbar floats over the top right of the code panel rather than taking a
    row of its own, so the editor keeps the full height and the buttons sit on
    the same edge a floating action bar would. The editor is given a top inset
-   so the first lines are never hidden underneath. */
+   so the first lines are never hidden underneath.
+
+   It stays on the right in every language. A right to left page mirrors its
+   words, not its tools: the run button belongs where the reader's hand already
+   is, and flipping it into the corner the language does not start from is a
+   small cost paid on every single run. */
 .file-menu {
 	position: absolute;
 	top: 10px;
@@ -537,29 +549,42 @@ code {
 	z-index: 5;
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 6px;
 	padding: 0;
 	background: transparent;
 }
 
-.editor-wrap {
-	flex: 1 1 auto;
-	min-height: 120px;
-	overflow: hidden;
-	position: relative;
-	padding-top: 48px;
+/* Icon buttons, the size a toolbar button is in an editor rather than the size a
+   web button is. The label stays available as a tooltip and to a screen reader,
+   because an icon alone is not a label. */
+.icon-button {
+	width: 34px;
+	height: 34px;
+	padding: 0;
+	justify-content: center;
+	border-radius: 8px;
+}
+
+.icon-button svg {
+	width: 16px;
+	height: 16px;
+	display: block;
+}
+
+.icon-button.icon-fill svg {
+	fill: currentColor;
 }
 
 .menu-button {
 	display: inline-flex;
 	align-items: center;
-	height: 38px;
-	padding: 8px 20px 6px 17px;
+	height: 34px;
+	padding: 0 12px;
 	font-family: inherit;
-	font-size: 15px;
+	font-size: 14px;
 	line-height: 1.5;
 	border: 0;
-	border-radius: 12px;
+	border-radius: 8px;
 	color: var(--fg);
 	background: transparent;
 	cursor: pointer;
@@ -576,10 +601,12 @@ code {
 	outline-offset: 2px;
 }
 
+/* Run is the one action a learner reaches for, so it is the one filled button,
+   in the playground's blue. The rest are tools, and read as tools when they are
+   not filled. */
 #run {
 	background: var(--run-bg);
 	color: var(--run-fg);
-	font-weight: 500;
 }
 
 #run:hover {
@@ -587,10 +614,21 @@ code {
 	color: var(--run-fg);
 }
 
-/* The output area is a collapsible panel with a tab strip, the way a terminal
-   panel works in an editor: the strip is always visible so the panel can be
-   reopened, and collapsing it gives the code the whole pane back. */
-.output-panel {
+.editor-wrap {
+	flex: 1 1 auto;
+	min-height: 120px;
+	overflow: hidden;
+	position: relative;
+	padding-top: 48px;
+}
+
+/* Standard input and output share one collapsible panel under the editor, the
+   way a terminal panel works: the tab strip is always visible so either half
+   can be reopened, and collapsing both gives the code the whole pane back.
+
+   Input and output are siblings rather than one scrolling region, so typing
+   never moves the output and running never scrolls the input away. */
+.io-panel {
 	flex: 0 0 auto;
 	display: flex;
 	flex-direction: column;
@@ -598,13 +636,13 @@ code {
 	background: var(--code-out-bg);
 }
 
-.output-tabs {
+.io-tabs {
 	flex: 0 0 auto;
 	display: flex;
 	background: var(--code-bg);
 }
 
-.output-tab {
+.io-tab {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
@@ -620,25 +658,61 @@ code {
 	cursor: pointer;
 }
 
-.output-tab:hover {
+.io-tab:hover {
 	color: var(--fg);
 }
 
-.output-tab[aria-expanded="true"] {
+.io-tab[aria-expanded="true"] {
 	color: var(--fg);
 	border-bottom-color: var(--run-bg);
 }
 
-.output-chevron {
+.io-chevron {
 	transition: transform 120ms ease;
 }
 
-.output-tab[aria-expanded="true"] .output-chevron {
+.io-tab[aria-expanded="true"] .io-chevron {
 	transform: rotate(180deg);
 }
 
-.output-panel.collapsed .output {
-	display: none;
+/* The editor is the only part that grows, so the panel takes what is left. */
+.stdin-panel {
+	flex: 0 0 auto;
+	max-height: 26vh;
+	display: flex;
+	flex-direction: column;
+	border-top: 1px solid var(--code-border);
+	background: var(--code-bg);
+}
+
+[hidden] {
+	display: none !important;
+}
+
+.stdin-label {
+	padding: 8px 14px 0;
+	color: var(--fg-muted);
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+#stdin {
+	flex: 1 1 auto;
+	min-height: 84px;
+	resize: vertical;
+	padding: 8px 14px 12px;
+	border: 0;
+	outline: none;
+	background: var(--code-bg);
+	color: var(--fg);
+	font-family: var(--mono);
+	font-size: 13px;
+	line-height: 1.5;
+	tab-size: 4;
+}
+
+#stdin:focus {
+	box-shadow: inset 0 0 0 1px var(--accent);
 }
 
 .output {
@@ -654,7 +728,8 @@ code {
 	background: var(--code-out-bg);
 }
 
-.output:empty {
+.io-panel.collapsed .stdin-panel,
+.io-panel.collapsed .output {
 	display: none;
 }
 
@@ -912,6 +987,37 @@ code {
 
 .CodeMirror .cm-operator {
 	color: var(--fg-muted);
+}
+
+.CodeMirror .cm-atom {
+	color: var(--cm-variable-2);
+}
+
+.CodeMirror .cm-bracket {
+	color: var(--fg);
+}
+
+.CodeMirror .cm-error {
+	color: var(--fg);
+	text-decoration: underline wavy var(--run-bg);
+}
+
+/* A highlighted block in the prose reuses the editor's own metrics, so a line
+   of V in a paragraph is the same width as a line of V in the editor and the
+   two read as the same material. The selector matches `.CodeMirror` on the block
+   itself, because there is no editor instance behind it. */
+pre.CodeMirror {
+	margin: 0;
+	padding: 12px 14px;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	background: var(--code-bg);
+	color: var(--code-fg);
+	font-family: var(--mono);
+	font-size: var(--cm-font-size, 13px);
+	line-height: 1.5;
+	overflow-x: auto;
+	tab-size: 4;
 }
 
 .cm-error-line {

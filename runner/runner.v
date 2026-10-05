@@ -92,6 +92,15 @@ pub fn toolchain_root() string {
 // The two phases are separate isolate invocations sharing one box, so the
 // compiler cannot outlive its own wall-clock budget and the program cannot
 // inherit anything the compiler left behind.
+//
+// A program that reads standard input reads nothing: there is no working way to
+// hand it a stream yet. Both forms were measured. Writing the input into the box
+// from the host does not work, because the box has two different views of its own
+// directory and the one the compiler and the program see is not the one
+// `os.write_file` writes to; `isolate --stdin` does not work either, because it
+// resolves its argument inside the chroot, where the host path does not exist.
+// Either way the program reports `open("stdin.txt"): No such file or directory`,
+// so the Input tab in the interface is hidden until one of them is fixed.
 pub fn run(files []SourceFile) RunResult {
 	problem := validate(files)
 	if problem != '' {
@@ -125,6 +134,7 @@ pub fn run(files []SourceFile) RunResult {
 
 	main_name := pick_main(files)
 	root := toolchain_root()
+
 	mut compile_argv := ['${root}/v']
 	compile_argv << compile_flag_args()
 	compile_argv << main_name
@@ -156,38 +166,6 @@ pub fn run(files []SourceFile) RunResult {
 		ran:        true
 		hit_limits: limited
 	}
-}
-
-// format runs `v fmt` over a single file and returns the formatted source.
-pub fn format(body string) string {
-	b := init_box()
-	if !b.ok {
-		return ''
-	}
-	defer {
-		cleanup(b)
-	}
-
-	tmp := SourceFile{
-		name: 'main.v'
-		body: body
-	}
-	write_problem := write_files(b, [tmp])
-	if write_problem != '' {
-		return ''
-	}
-
-	root := toolchain_root()
-	mut fmt_argv := ['${root}/v', 'fmt']
-	fmt_argv << format_flag_args()
-	fmt_argv << 'main.v'
-	res := exec_boxed(b, root, tool_limits(), fmt_argv)
-	if res.exit_code != 0 {
-		return ''
-	}
-	// `v fmt` echoes the formatted file to stdout, so the body is what comes
-	// back rather than a status line.
-	return res.output
 }
 
 // compiler_version reports the compiler inside the sandbox.

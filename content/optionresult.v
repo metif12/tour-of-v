@@ -35,6 +35,9 @@ pub fn optionresult() Module {
 					Page{
 						title: 'Congratulations!'
 						body:  or_done
+						code:  Example{
+							files: [optionresult_done_file]
+						}
 					},
 				]
 			},
@@ -45,6 +48,13 @@ pub fn optionresult() Module {
 const options_file = CodeFile{
 	name: 'options.v'
 	body: $embed_file('examples/options.v').to_string()
+}
+
+// The closing page shows the three ways of asking an Option and one way of
+// recovering from a Result, which is what the lesson was about.
+const optionresult_done_file = CodeFile{
+	name: 'optionresult_done.v'
+	body: $embed_file('examples/optionresult_done.v').to_string()
 }
 
 const errors_file = CodeFile{

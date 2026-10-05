@@ -26,6 +26,9 @@ pub fn methods() Module {
 					Page{
 						title: 'Printable types'
 						body:  me_str
+						code:  Example{
+							files: [printable_types_file]
+						}
 					},
 					Page{
 						title: 'Exercise: Shapes'
@@ -38,6 +41,9 @@ pub fn methods() Module {
 					Page{
 						title: 'Congratulations!'
 						body:  me_done
+						code:  Example{
+							files: [methods_done_file]
+						}
 					},
 				]
 			},
@@ -48,6 +54,21 @@ pub fn methods() Module {
 const interfaces_file = CodeFile{
 	name: 'interfaces.v'
 	body: $embed_file('examples/interfaces.v').to_string()
+}
+
+// The prose on this page shows two fragments of a Temperature type. The panel
+// carries the whole thing, so the reader can run the idea instead of only
+// reading it.
+const printable_types_file = CodeFile{
+	name: 'printable_types.v'
+	body: $embed_file('examples/printable_types.v').to_string()
+}
+
+// The closing page uses a mutating method, a read-only method and an interface
+// in one program, which is the whole lesson.
+const methods_done_file = CodeFile{
+	name: 'methods_done.v'
+	body: $embed_file('examples/methods_done.v').to_string()
 }
 
 const embedding_file = CodeFile{

@@ -63,6 +63,9 @@ pub fn controlflow() Module {
 					Page{
 						title: 'Congratulations!'
 						body:  cf_done
+						code:  Example{
+							files: [controlflow_done_file]
+						}
 					},
 				]
 			},
@@ -73,6 +76,13 @@ pub fn controlflow() Module {
 const for_file = CodeFile{
 	name: 'main.v'
 	body: $embed_file('examples/for.v').to_string()
+}
+
+// The closing page puts the three looping forms side by side, so the code panel
+// stays on the page and shows the lesson rather than a stub.
+const controlflow_done_file = CodeFile{
+	name: 'controlflow_done.v'
+	body: $embed_file('examples/controlflow_done.v').to_string()
 }
 
 const while_and_forever_file = CodeFile{

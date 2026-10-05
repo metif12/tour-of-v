@@ -73,6 +73,25 @@ fn test_every_embedded_example_is_present() {
 	assert checked >= 15, 'expected at least 15 embedded examples, got ${checked}'
 }
 
+// Every page carries a program. The code panel is the tour's main surface, and
+// a page without a program would drop it, which is why this is a hard rule
+// rather than a style preference: add an example before removing the panel.
+fn test_every_page_has_a_program() {
+	t := build()
+	mut without := 0
+	for m in t.modules {
+		for l in m.lessons {
+			for p in l.pages {
+				if (p.code or { content.Example{} }).files.len == 0 {
+					without++
+					println('page without a program: ${l.slug} / ${p.title}')
+				}
+			}
+		}
+	}
+	assert without == 0, '${without} page(s) have no program, so the code panel is missing'
+}
+
 // Code examples must survive embedding byte for byte. A stray backslash or
 // a resolved interpolation would show up here.
 fn test_embedded_examples_keep_string_interpolation() {

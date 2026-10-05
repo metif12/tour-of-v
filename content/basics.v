@@ -78,6 +78,9 @@ pub fn basics() Module {
 					Page{
 						title: 'Congratulations!'
 						body:  basics_done
+						code:  Example{
+							files: [basics_done_file]
+						}
 					},
 				]
 			},
@@ -88,6 +91,13 @@ pub fn basics() Module {
 const modules_file = CodeFile{
 	name: 'modules.v'
 	body: $embed_file('examples/modules.v').to_string()
+}
+
+// The closing page recaps the basic types in one runnable program, so the code
+// panel has something real on it instead of going missing.
+const basics_done_file = CodeFile{
+	name: 'basics_done.v'
+	body: $embed_file('examples/basics_done.v').to_string()
 }
 
 const imports_file = CodeFile{
