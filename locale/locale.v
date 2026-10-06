@@ -51,7 +51,21 @@ pub:
 // lands.
 pub const locales = [
 	Locale{ code: 'en', name: 'English', native: 'English', rtl: false },
+	Locale{ code: 'zh', name: 'Chinese (Simplified)', native: '简体中文', rtl: false },
+	Locale{ code: 'hi', name: 'Hindi', native: 'हिन्दी', rtl: false },
+	Locale{ code: 'es', name: 'Spanish', native: 'Español', rtl: false },
 	Locale{ code: 'fa', name: 'Persian', native: 'فارسی', rtl: true },
+	Locale{ code: 'ar', name: 'Arabic', native: 'العربية', rtl: true },
+	Locale{ code: 'fr', name: 'French', native: 'Français', rtl: false },
+	Locale{ code: 'bn', name: 'Bengali', native: 'বাংলা', rtl: false },
+	Locale{ code: 'pt', name: 'Portuguese', native: 'Português', rtl: false },
+	Locale{ code: 'ru', name: 'Russian', native: 'Русский', rtl: false },
+	Locale{ code: 'ur', name: 'Urdu', native: 'اردو', rtl: true },
+	Locale{ code: 'id', name: 'Indonesian', native: 'Bahasa Indonesia', rtl: false },
+	Locale{ code: 'de', name: 'German', native: 'Deutsch', rtl: false },
+	Locale{ code: 'ja', name: 'Japanese', native: '日本語', rtl: false },
+	Locale{ code: 'tr', name: 'Turkish', native: 'Türkçe', rtl: false },
+	Locale{ code: 'ko', name: 'Korean', native: '한국어', rtl: false },
 ]
 
 // PageText is a translated page title and body.
@@ -124,7 +138,21 @@ pub fn known(code string) bool {
 // one the tour knows.
 pub fn translations(code string) Text {
 	return match code {
+		'zh' { zh }
+		'hi' { hi }
+		'es' { es }
 		'fa' { fa }
+		'ar' { ar }
+		'fr' { fr }
+		'bn' { bn }
+		'pt' { pt }
+		'ru' { ru }
+		'ur' { ur }
+		'id' { id }
+		'de' { de }
+		'ja' { ja }
+		'tr' { tr }
+		'ko' { ko }
 		else { en }
 	}
 }
