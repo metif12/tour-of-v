@@ -82,13 +82,13 @@ lesson.
 Use the scaffolding script to create the files with the right shape:
 
 ```sh
-python scripts/new_lesson.py <module-slug> <module-title> <lesson-slug> <lesson-title>
+v run scripts/new_lesson.vsh <module-slug> <module-title> <lesson-slug> <lesson-title>
 ```
 
 For example:
 
 ```sh
-python scripts/new_lesson.py structs "Structs" structs_intro "Introduction to Structs"
+v run scripts/new_lesson.vsh structs "Structs" structs_intro "Introduction to Structs"
 ```
 
 This creates `content/structs.v` with a stub module and lesson, and
@@ -118,14 +118,14 @@ broken page having stopped being broken.
 Use the scaffolding script to create a locale file with all UI keys:
 
 ```sh
-python scripts/new_locale.py <code> <english-name> <native-name> [--rtl]
+v run scripts/new_locale.vsh <code> <english-name> <native-name> [--rtl]
 ```
 
 For example:
 
 ```sh
-python scripts/new_locale.py sv Swedish Svenska
-python scripts/new_locale.py he Hebrew עברית --rtl
+v run scripts/new_locale.vsh sv Swedish Svenska
+v run scripts/new_locale.vsh he Hebrew עברית --rtl
 ```
 
 This creates `locale/<code>.v` with every UI key scaffolded, and registers the
