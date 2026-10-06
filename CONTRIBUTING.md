@@ -79,6 +79,24 @@ lesson.
 
 ## Adding a lesson page
 
+Use the scaffolding script to create the files with the right shape:
+
+```sh
+python scripts/new_lesson.py <module-slug> <module-title> <lesson-slug> <lesson-title>
+```
+
+For example:
+
+```sh
+python scripts/new_lesson.py structs "Structs" structs_intro "Introduction to Structs"
+```
+
+This creates `content/structs.v` with a stub module and lesson, and
+`content/examples/structs_intro_example.v` with a stub example. It also adds
+the module to `content/catalog.v`.
+
+Then fill in the stubs:
+
 1. Put the runnable example in `content/examples/<name>.v` as a real V file.
    Do not put V source in a string literal: every V string form interpolates
    `${...}`, and V examples are full of interpolation. Embed the file with
@@ -94,6 +112,26 @@ lesson.
 `tour/tour_test.v` already checks the invariants that are easy to break: a
 lesson without a title, an example embedded as empty, and the deliberately
 broken page having stopped being broken.
+
+## Adding a locale
+
+Use the scaffolding script to create a locale file with all UI keys:
+
+```sh
+python scripts/new_locale.py <code> <english-name> <native-name> [--rtl]
+```
+
+For example:
+
+```sh
+python scripts/new_locale.py sv Swedish Svenska
+python scripts/new_locale.py he Hebrew עברית --rtl
+```
+
+This creates `locale/<code>.v` with every UI key scaffolded, and registers the
+locale in `locale/locale.v`. Fill in the translations, then translate page
+bodies in the `pages` map as time allows — untranslated pages fall back to
+English automatically.
 
 ## Reporting a compiler bug
 
