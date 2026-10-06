@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# The tour runs code submitted by anyone who visits it, so the container is part
+# of the trust boundary. That is why the container job exists: `v test .` checks
+# that a page has a program and that the example embeds non-empty, but it never
+# compiles anything, and eight examples shipped that compiled on the author's
+# machine and not in the sandbox. The image build and the self-test are the only
+# checks that reflect what a reader actually runs.
+
+jobs:
+  v-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: vlang/setup-v@v1
+        with:
+          version: '0.5.2'
+
+      # `v fmt -l` lists files that are not formatted. It should print nothing,
+      # so the test is that its output is empty. Redirecting rather than using
+      # `v fmt -w` keeps the job read-only.
+      - name: Format
+        run: test -z "$(v fmt -l .)"
+
+      - name: Check
+        run: v -check .
+
+      - name: Test
+        run: v test .
+
+  container:
+    runs-on: ubuntu-latest
+    needs: v-checks
+    steps:
+      - uses: actions/checkout@v4
+
+      # Building the image compiles the tour with the pinned source compiler,
+      # fetches the release compiler for the sandbox, and builds isolate from
+      # source. It needs a C compiler, which ubuntu-latest has.
+      - name: Build image
+        run: docker build -t tour-of-v:ci .
+
+      # The self-test compiles and runs a program inside a real sandbox and then
+      # attacks it. It needs `--privileged` for the namespaces and `--tmpfs` so
+      # the box has a writable temporary filesystem.
+      - name: Self-test
+        run: docker run --rm --privileged --tmpfs /tmp tour-of-v:ci /usr/local/bin/tour --self-test-only
