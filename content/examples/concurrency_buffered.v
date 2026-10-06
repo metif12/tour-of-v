@@ -34,16 +34,22 @@ fn main() {
 	}
 	println('2 drained them, total ${total}')
 
-	// 3. The trap. `len:` also compiles on a channel literal and it does not do
-	//    what it looks like: the channel is still unbuffered, so the capacity
-	//    is zero and `len()` never rises. Use `cap:`.
-	looks_buffered := chan int{len: 4}
-	println('3 len is ${looks_buffered.len}, cap is ${looks_buffered.cap}')
-	spawn slow_sender(looks_buffered)
-	time.sleep(100 * time.millisecond)
-	println('3 length is still ${looks_buffered.len}, so it is unbuffered')
-	println('3 draining it: ${<-looks_buffered} ${<-looks_buffered} ${<-looks_buffered}')
-
+	// 3. The field is `cap:`, and the compiler says so if you get it wrong.
+	//    Writing `chan int{len: 4}` does not make a four-slot buffer, and it is
+	//    not accepted at all:
+	//
+	//        `len` cannot be initialized for `chan`. Did you mean `cap`?
+	//
 	// 4. `cap()` is the room available, and it is fixed at creation.
 	println('4 cap of the buffered channel is ${buffered.cap}')
+
+	// 5. The rule that actually bites. Buffering only helps up to the capacity:
+	//    a sender with more to send than there is room for blocks on the first
+	//    value that does not fit. With four slots and six jobs, and no receiver
+	//    started yet, the fifth send waits for a consumer that is not running.
+	//    So size the buffer for the whole list, or start the consumers first.
+	tight := chan int{cap: 2}
+	tight <- 1
+	tight <- 2
+	println('5 the buffer is full, len is ${tight.len} and cap is ${tight.cap}')
 }

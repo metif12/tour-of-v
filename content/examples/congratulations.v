@@ -4,7 +4,6 @@ module main
 //
 // Everything from here on is ordinary V: the same structs, the same functions,
 // the same compiler you have been using. Keep going.
-module main
 
 struct Tour {
 mut:

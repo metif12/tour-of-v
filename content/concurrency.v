@@ -226,16 +226,17 @@ println(buffered.len)  // 3, once the sends have finished</code></pre>
 <p>Choose the buffer when a producer should not be held up by a slow consumer.
 The capacity is fixed when the channel is created, and a buffered and an
 unbuffered channel of the same element type are different types.</p>
-<p>Here is a trap worth the half minute it takes to remember.
-<code>len:</code> also compiles on a channel literal, and it does not do what it
-looks like:</p>
-<pre><code>looks_buffered := chan int{len: 4}
-println(looks_buffered.cap) // 0</code></pre>
-<p>It compiles, and it gives you an unbuffered channel, so the capacity you
-thought you had set is silently zero and <code>len()</code> never rises. Write
-<code>cap:</code>. The same trap applies to a job queue: filling a channel
-before starting the workers that read it deadlocks on the first send that does
-not fit, so either buffer the whole list or start the consumers first.</p>'
+<p>Here is a trap worth the half minute it takes to remember. The field that sets
+the size is <code>cap:</code>, and writing <code>len:</code> instead is refused
+rather than quietly ignored:</p>
+<pre><code>chan int{len: 4}
+// `len` cannot be initialized for `chan`. Did you mean `cap`?</code></pre>
+<p>The message names the field you meant, which is about as good as this gets.
+The other trap is not about spelling. Buffering only helps up to the capacity: a
+sender with more to send than there is room for blocks on the first value that
+does not fit. So with four slots and six jobs, and no consumer started yet, the
+fifth send waits for a consumer that is not running. Either buffer the whole
+list or start the consumers first.</p>'
 
 const co_receive = '<h2>Receiving until close</h2>
 <p><strong>There is no <code>for x in ch</code> in V.</strong> A channel is not a
@@ -255,6 +256,13 @@ part that is easy to get wrong in the other direction:
 On an open channel with nothing in it, <code>&lt;-ch or { -1 }</code> still
 blocks, waiting for a sender. It is not a non-blocking poll, whatever it looks
 like.</p>
+<p>One detail about sends that will cost you an afternoon if nobody mentions it.
+The send expression stops at the arrow, so a computed value on the right needs
+brackets:</p>
+<pre><code>ch &lt;- i * i     // error: mismatched types `void` and `int literal`
+ch &lt;- (i * i)   // sends the product</code></pre>
+<p>Without them the compiler tries to multiply the void that <code>ch &lt;- i</code>
+produced, and says so in a way that does not obviously point at the arrow.</p>
 <p>When the producer told you the count, the loop is unnecessary:</p>
 <pre><code>for _ in 0 .. 4 {
 	total += &lt;-ch
@@ -315,17 +323,27 @@ order:</p>
 	out &lt;- 5 {
 		// the channel had room
 	}
-	v := &lt;-fast {
-		// this one answered first
+	50 * time.millisecond {
+		// it stayed full
 	}
 }</code></pre>
-<p>Two details about the syntax. A receive branch written after a send branch
-needs the <code>v := &lt;-ch</code> form; written bare, <code>&lt;-ch</code> is read
-as a timeout and the compiler complains about a string where it wanted
-nanoseconds. And <code>mut</code> on the receiving variable matters, because the
-branches assign rather than return.</p>
-<p>A duration in a branch position is a timeout, and only one per select. This is
-how a wait stops being unbounded:</p>
+<p>Two constraints worth knowing before you write one, both measured against the
+compiler rather than documented.</p>
+<p><strong>Keep the two shapes in separate selects.</strong> A select holding a
+send branch <em>and</em> a receive branch crashes the compiler outright instead
+of reporting an error, so pair a send with a timeout or with another send.</p>
+<p><strong>A branch must name a channel that already exists.</strong> Writing the
+channel inline is refused:</p>
+<pre><code>never := &lt;-chan int{} {}      // channel in `select` key must be predefined
+never := chan int{}            // declare it first
+select {
+	v := &lt;-never {
+		// ...
+	}
+}</code></pre>
+<p>And the branches assign rather than return, so the variable they write into
+has to be <code>mut</code>. A duration in a branch position is a timeout, and
+only one per select. This is how a wait stops being unbounded:</p>
 <pre><code>select {
 	v := &lt;-quiet {
 		println('got &dollar;{v}')

@@ -249,6 +249,78 @@ fn test_exercise_pages_carry_a_solution() {
 	assert exercises >= 1, 'expected at least one exercise with a solution'
 }
 
+// An example declares its module exactly once.
+//
+// `congratulations.v` shipped with two `module main` lines and the sandbox
+// compiler rejected it with "unexpected keyword `module`", so the final page of
+// the first lesson ran nothing. Nothing else in the suite notices: the example
+// embeds fine, contains a `fn main()`, and the page has a program. Counting is
+// cheap; compiling 66 programs in a unit test is not, so this pins the cheap
+// half and CONTRIBUTING points at the other half.
+fn test_every_example_declares_its_module_once() {
+	t := build()
+	for ref in t.pages {
+		code := ref.page.code or { continue }
+		for f in code.files {
+			// Only declarations count. A mention inside a comment or a string
+			// is not a second module clause, and the deliberately broken page
+			// quotes this text while explaining its own error.
+			mut declared := 0
+			for raw_line in f.body.split_into_lines() {
+				if raw_line.trim_space().starts_with('module ') {
+					declared++
+				}
+			}
+			// At most once. Not exactly once: `hello.v` is a bare program with
+			// no module clause at all, which V allows.
+			assert declared <= 1, 'example ${f.name} declares a module ' +
+				'${declared} times, expected at most once'
+		}
+	}
+}
+
+// Send statements need a bracketed right-hand side.
+//
+// `ch <- i * i` does not send the product: the send expression stops at the
+// arrow, so the compiler multiplies the void the send produced and reports
+// "mismatched types `void` and `int literal`". The host compiler accepted it
+// and the sandbox compiler did not, which is why the rule is asserted rather
+// than left to review.
+fn test_computed_sends_are_bracketed() {
+	t := build()
+	for ref in t.pages {
+		code := ref.page.code or { continue }
+		for f in code.files {
+			for raw_line in f.body.split_into_lines() {
+				line := raw_line.trim_space()
+				// A line that is a comment, or a commented-out line, is prose
+				// about the rule and cannot break it.
+				if line.starts_with('//') {
+					continue
+				}
+				if !line.contains('<-') {
+					continue
+				}
+				// The text after the last arrow on the line.
+				after := line.all_after_last('<-').trim_space()
+				// Already bracketed, a bare value, or a string literal. A
+				// string may contain any operator it likes: an interpolation
+				// such as `ch <- 'value ${i + 1}'` is one operand.
+				if after == '' || after.starts_with('(') || after.starts_with("'")
+					|| after.starts_with('r') || after.starts_with('`') {
+					continue
+				}
+				// An operator after an operand means the right hand side is
+				// computed, so it has to be bracketed.
+				if after.contains(' * ') || after.contains(' + ') || after.contains(' / ')
+					|| after.contains(' - ') || after.contains(' % ') {
+					assert false, 'example ${f.name} sends an unbracketed expression: ${line}'
+				}
+			}
+		}
+	}
+}
+
 fn test_main_file_picks_main_v() {
 	e := content.Example{
 		files: [

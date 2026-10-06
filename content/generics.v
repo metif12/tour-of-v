@@ -170,19 +170,28 @@ mut:
 	first  A
 	second B
 }</code></pre>
-<p>Here is the limit that catches people, and the compiler enforces it. Because
-<code>A</code> and <code>B</code> have no relation, there is no conversion
-between them to offer, so a method cannot move a value from one field to the
+<p>Here is the limit that catches people, and it is worth being precise about,
+because the error message does not point at the method you are looking at.
+<code>A</code> and <code>B</code> have no relation, so there is no conversion
+between them to offer, and a method cannot move a value from one field to the
 other:</p>
 <pre><code>fn (mut p Pair[A, B]) swap() {
-	mut held := p.first
-	p.first = p.second // error for Pair[string, int]
-	p.second = held
+	p.first = p.second
 }</code></pre>
-<p>The same method is fine on <code>Pair[int, int]</code>, where both fields hold
-the same type. The lesson is that &ldquo;two type parameters&rdquo; means two
-genuinely independent types, and a generic method can only promise something
-true of every one of them.</p>'
+<p>The reason is a property of generic methods rather than of pairs, and it is
+worth understanding rather than memorising. A generic method body is checked
+against <em>every</em> instantiation that gets used, so it has to be valid for
+all of them at once. That is why the method is fine on
+<code>Pair[int, int]</code>, where both fields hold one type, and still refused
+as soon as <code>Pair[string, int]</code> uses it. The error names the offending
+instantiation rather than the declaration:</p>
+<pre><code>cannot assign to `p.first`: expected `string`, not `int`</code></pre>
+<p>So the rule to hold onto is that a generic method may only promise something
+true of every type it will be instantiated with. Reading both fields always
+qualifies, which is why <code>describe</code> works for every instantiation:</p>
+<pre><code>fn (p &amp;Pair[A, B]) describe() string {
+	return "(&dollar;{p.first}, &dollar;{p.second})"
+}</code></pre>'
 
 const ge_maps = "<h2>Maps of generic types</h2>
 <p>A generic type can be the value type of a map, and the type argument is
@@ -207,9 +216,9 @@ makes the map useful rather than merely legal:</p>
 	}
 }</code></pre>
 <p>Note the <code>_,</code> in the map loop. Naming the key would be
-<code>for team, stack in teams</code>; the underscore says the key is not
-needed. A name of two or more characters after the underscore is rejected, so
-it is <code>_</code> or a real name.</p>
+<code>for team, stack in teams</code>; the bare underscore says the key is not
+needed. It has to be bare: an underscore followed by a name is refused, so
+<code>_k</code> will not do.</p>
 <p>Maps are reference types, which is what makes the two-step write work:
 <code>teams['red'].push(10)</code> finds the stack in the map and mutates the
 same struct, rather than copying it and losing the change.</p>"

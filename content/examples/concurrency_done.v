@@ -74,10 +74,15 @@ fn main() {
 
 	// A select with a timeout bounds the last wait, so a program can never hang
 	// on a producer that stopped early.
+	//
+	// The channel is declared first: a select branch has to name a channel that
+	// already exists, so `never := <-chan int{}` written inline is refused with
+	// "channel in `select` key must be predefined".
+	never := chan int{cap: 1}
 	mut gave_up := false
 	select {
-		never := <-chan int{} {
-			println('never: ${never}')
+		v := <-never {
+			println('never: ${v}')
 		}
 		100 * time.millisecond {
 			gave_up = true

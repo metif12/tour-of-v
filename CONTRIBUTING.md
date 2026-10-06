@@ -47,6 +47,36 @@ running at the same time, because both want port 8080.
 `v fmt -w .` covers the veb templates too. A template change that has not been
 formatted will fail the build.
 
+## If you touched a lesson example
+
+`v test .` does **not** compile the examples. It checks that each page has a
+program, that each example embeds non-empty, and that each has a `fn main()`,
+which is why six examples were able to ship that compiled on the author's
+machine and not in the sandbox. Sixty compiler invocations do not belong in a
+unit test, so the other half of the check lives in a script.
+
+The compiler that matters is the one in the image, which is not the one on your
+machine. Both report `V 0.5.2` and they disagree: a send needs brackets around
+a computed value, `chan T` takes `cap:` and refuses `len:`, a `select` with both
+a send and a receive branch crashes the compiler, and `json2` is `x.json2`.
+
+So build the image, serve it, and run every example through it:
+
+```sh
+docker build -t tour-of-v:check .
+docker run -d --name tour-check -p 8128:8080 tour-of-v:check
+python scripts/check_examples.py http://127.0.0.1:8128
+docker rm -f tour-check
+```
+
+It runs all sixty-odd examples and exits non-zero if any produces no output.
+`variables_broken.v` is meant to fail and is recognised by content, not by
+name. Pick a free port and check nothing else already owns it: a stale container
+answering on the port reports its own CSS as your build.
+
+Run it whenever you edit anything under `content/examples/`, or the prose in a
+lesson.
+
 ## Adding a lesson page
 
 1. Put the runnable example in `content/examples/<name>.v` as a real V file.

@@ -5,7 +5,10 @@ module main
 fn counted(ch chan int, n int) {
 	// V's ranges are half-open, so `0 .. n` is exactly n turns.
 	for i in 0 .. n {
-		ch <- i * i
+		// The parentheses are needed. A send expression stops at the arrow, so
+		// without them the compiler tries to multiply the void that the send
+		// produced, and reports `mismatched types `void` and `int literal``.
+		ch <- (i * i)
 	}
 	ch.close()
 }
