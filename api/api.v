@@ -72,7 +72,9 @@ pub fn run(mut ctx veb.Context) veb.Result {
 		})
 	}
 
-	res := runner.run([submitted_file(&ctx)])
+	mut files := [submitted_file(&ctx)]
+	stdin := ctx.form['stdin'] or { '' }
+	res := runner.run(files, stdin)
 	return ctx.json(RunResponse{
 		output:    res.output
 		build_out: res.build_out
@@ -119,7 +121,8 @@ pub fn check_output(mut ctx veb.Context) veb.Result {
 	}
 
 	expected := ctx.form['expected'] or { '' }
-	res := runner.run([submitted_file(&ctx)])
+	stdin := ctx.form['stdin'] or { '' }
+	res := runner.run([submitted_file(&ctx)], stdin)
 	return ctx.json(CheckResponse{
 		output:   res.output
 		is_equal: res.error == '' && res.output.trim_space() == expected.trim_space()

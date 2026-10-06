@@ -101,7 +101,7 @@ pub fn toolchain_root() string {
 // resolves its argument inside the chroot, where the host path does not exist.
 // Either way the program reports `open("stdin.txt"): No such file or directory`,
 // so the Input tab in the interface is hidden until one of them is fixed.
-pub fn run(files []SourceFile) RunResult {
+pub fn run(files []SourceFile, stdin string) RunResult {
 	problem := validate(files)
 	if problem != '' {
 		return RunResult{
@@ -132,6 +132,16 @@ pub fn run(files []SourceFile) RunResult {
 		}
 	}
 
+	if stdin != '' {
+		os.write_file(os.join_path(b.path, 'stdin.txt'), stdin) or {
+			return RunResult{
+				output:    ''
+				build_out: ''
+				error:     'Failed to write stdin.'
+			}
+		}
+	}
+
 	main_name := pick_main(files)
 	root := toolchain_root()
 
@@ -152,7 +162,12 @@ pub fn run(files []SourceFile) RunResult {
 		}
 	}
 
-	out := exec_boxed(b, root, run_limits(), ['./${binary_name(main_name)}'])
+	mut run_argv := ['./${binary_name(main_name)}']
+	if stdin != '' {
+		run_argv << '<'
+		run_argv << 'stdin.txt'
+	}
+	out := exec_boxed(b, root, run_limits(), run_argv)
 
 	mut output := strip_isolate_status(out.output)
 	limited := hit_resource_limit(out)

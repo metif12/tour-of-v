@@ -69,8 +69,8 @@ fn test_other_locales_are_prefixed() {
 // cannot be tightened into a blank page by accident.
 
 fn test_untranslated_page_falls_back_to_english() {
-	// welcome/5 exists and has no Persian text.
-	_ := locale.page_text('fa', 'welcome', 5) or { return }
+	// A page that does not exist in any locale falls back to English.
+	_ := locale.page_text('fa', 'nonexistent', 99) or { return }
 	assert false
 }
 
@@ -101,6 +101,28 @@ fn test_ui_map_always_has_every_english_key() {
 //
 // This walks the real catalogue and fails if a translation names a page that is
 // not there.
+
+fn test_every_locale_has_every_page_translation() {
+	mods := content.modules()
+	mut required := map[string]bool{}
+	for m in mods {
+		for les in m.lessons {
+			for i, _ in les.pages {
+				required['${les.slug}/${i + 1}'] = true
+			}
+		}
+	}
+	assert required.len > 0
+	for l in locale.locales {
+		if l.code == locale.default_locale {
+			continue
+		}
+		text := locale.translations(l.code)
+		for key, _ in required {
+			assert key in text.pages, '${l.code} is missing ${key}'
+		}
+	}
+}
 
 fn test_every_translated_page_key_exists() {
 	mods := content.modules()

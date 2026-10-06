@@ -45,7 +45,7 @@ pub fn self_test() IsolationVerdict {
 	hello := run([SourceFile{
 		name: 'main.v'
 		body: "fn main() {\n\tprintln('self test ok')\n}\n"
-	}])
+	}], '')
 	if hello.error != '' || !hello.ran || !hello.output.contains('self test ok') {
 		verdict.fatal << 'a trivial program did not run: ${hello.error}'
 		if hello.build_out != '' {
@@ -113,7 +113,7 @@ pub fn self_test() IsolationVerdict {
 	sleeper := run([SourceFile{
 		name: 'main.v'
 		body: "import time\n\nfn main() {\n\ttime.sleep(60 * time.second)\n\tprintln('SLEPT')\n}\n"
-	}])
+	}], '')
 	if sleeper.error == '' && sleeper.output.contains('SLEPT') {
 		verdict.fatal << 'a program slept for 60 seconds and was not stopped'
 		verdict.ok = false
@@ -124,7 +124,7 @@ pub fn self_test() IsolationVerdict {
 	bad := run([SourceFile{
 		name: 'main.v'
 		body: 'fn main() { this is not V }\n'
-	}])
+	}], '')
 	if bad.ran {
 		verdict.warnings << 'a program that cannot compile appears to have run'
 	}
@@ -154,7 +154,7 @@ fn run_probe(p Probe) string {
 	res := run([SourceFile{
 		name: 'main.v'
 		body: p.body
-	}])
+	}], '')
 	elapsed := time.since(started)
 
 	// A probe that fails to compile tells us nothing about containment, so it

@@ -19,17 +19,16 @@ Eight lessons, in reading order:
 | Lesson | Pages | State |
 |---|---|---|
 | `welcome` — how to use the tour | 5 | written |
-| `basics` — modules, variables, functions | 13 | written |
+| `basics` — modules, variables, functions | 12 | written |
 | `controlflow` — for, if, match, defer | 10 | written |
 | `moretypes` — structs, arrays, slices, maps, strings | 8 | written |
 | `optionresult` — Option and Result in depth | 4 | written |
 | `methods` — interfaces, embedding, `str` | 5 | written |
-| `generics` — type parameters | — | placeholder |
-| `concurrency` — spawn, channels, lock | — | placeholder |
+| `generics` — type parameters | 6 | written |
+| `concurrency` — spawn, channels, lock | 11 | written |
 
-The two unwritten lessons are listed and navigable but say plainly that they
-are not written yet, so the shape of the finished tour is visible from the
-start. 45 pages of real content exist today, across 39 example programs.
+61 pages of content across 66 example programs. All 8 lessons are written and
+translated into 16 locales.
 
 ## How it is put together
 

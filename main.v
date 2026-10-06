@@ -191,7 +191,7 @@ fn render_list(mut ctx Context, t &tour.Tour, loc string) veb.Result {
 	title := locale.ui_string(loc, 'site_title')
 	toc := build_toc(t, loc)
 	veb_content := $tmpl('templates/list.html')
-	return render_base(mut ctx, loc, title, toc, '/list', veb_content)
+	return render_base(mut ctx, loc, title, toc, '/list', veb_content, ui_for(loc))
 }
 
 // render_page renders one lesson page in one language.
@@ -199,140 +199,12 @@ fn render_list(mut ctx Context, t &tour.Tour, loc string) veb.Result {
 // The English and prefixed routes both land here, so a translated page cannot
 // drift from the English one: there is one place that builds the view.
 fn render_page(mut ctx Context, t &tour.Tour, loc string, slug string, number int) veb.Result {
-	ref := t.resolve(slug, number) or { return ctx.not_found() }
-
-	heading := page_title(loc, ref.lesson.slug, ref.number, ref.page.title)
-	prose := page_body(loc, ref.lesson.slug, ref.number, ref.page.body)
-	title := '${heading} - ${locale.ui_string(loc, 'site_title')}'
+	page_view := build_page_view(t, loc, slug, number) or { return ctx.not_found() }
+	title := '${page_view.page_data.title} - ${page_view.ui.site}'
 	toc := build_toc(t, loc)
 	path := '/${slug}/${number}'
-
-	example := ref.page.code or { content.Example{} }
-	page_data := PageData{
-		module_id: ref.module_id
-		lesson:    ref.lesson.slug
-		locale:    loc
-		title:     heading
-		number:    ref.number
-		total:     ref.total
-		body:      prose
-		files:     view_files(example.files)
-		solution:  view_files(example.solution)
-		prev:      link_view(t.prev(ref), loc)
-		next:      link_view(t.next(ref), loc)
-	}
-	page_json := embed_json(json2.encode(page_data))
-
-	// The lesson template asks these questions itself; they are named here so
-	// the conditions read as English at the point of use.
-	has_code := page_data.files.len > 0
-	has_solution := page_data.solution.len > 0
-	has_files_tabs := page_data.files.len > 1
-	// The toolbar sits above the editor, the way play.vlang.io puts its tools
-	// above the editors and its terminal below them.
-	has_tools := has_code
-	// Format works: it formats in process, with the same formatter `v fmt` uses,
-	// so there is nothing in a sandbox and nothing to build. See runner/format.v
-	// for why that matters and what the risk is.
-	has_format := has_code
-	// Standard input is not offered yet. The field and the limit are in place, but
-	// the sandbox has no working way to hand input to a program, so showing the
-	// tab would promise something the run does not deliver. This is the one switch
-	// to flip once the transport works. See the note on `runner.run`.
-	has_stdin := false
-	prev_page := link_view(t.prev(ref), loc)
-	next_page := page_data.next
-	has_prev := prev_page.slug != ''
-	has_next := next_page.slug != ''
-
-	// The lesson template needs the page chrome strings too, not just base.html.
-	// veb resolves a template variable from the enclosing function at the point
-	// the template is expanded, so these have to be in scope before $tmpl and
-	// cannot simply be inherited from render_base.
-	u := ui_for(loc)
-	counter := counter_text(loc, ref.number, ref.total)
-	lang_prefix := if loc == locale.default_locale { '' } else { '/' + loc }
-	ui_run := u.run
-	ui_format := u.format
-	ui_reset := u.reset
-	ui_solution := u.solution
-	ui_output := u.output
-	ui_prev := u.prev_page
-	ui_next := u.next_page
-	ui_resize := u.resize
-
 	veb_content := $tmpl('templates/page.html')
-	return render_base(mut ctx, loc, title, toc, path, veb_content)
-}
-
-// UiStrings is the interface text one request needs, already resolved for a
-// locale.
-//
-// It is a struct rather than a map because veb resolves a template variable
-// from the enclosing function, so the names have to be spelled out somewhere.
-// One struct with one constructor keeps the page view and the shared chrome
-// from drifting into showing two different languages.
-struct UiStrings {
-pub mut:
-	site        string
-	toc         string
-	theme       string
-	help        string
-	help_close  string
-	language    string
-	run         string
-	format      string
-	reset       string
-	solution    string
-	output      string
-	resize      string
-	prev        string
-	next        string
-	run_program string
-	next_page   string
-	prev_page   string
-	toggle_help string
-	move_panes  string
-	not_found   string
-}
-
-// ui_for resolves the interface catalogue for a locale.
-fn ui_for(loc string) UiStrings {
-	return UiStrings{
-		site:        locale.ui_string(loc, 'site_title')
-		toc:         locale.ui_string(loc, 'toc')
-		theme:       locale.ui_string(loc, 'toggle_theme')
-		help:        locale.ui_string(loc, 'help')
-		help_close:  locale.ui_string(loc, 'help_close')
-		language:    locale.ui_string(loc, 'language')
-		run:         locale.ui_string(loc, 'run')
-		format:      locale.ui_string(loc, 'format')
-		reset:       locale.ui_string(loc, 'reset')
-		solution:    locale.ui_string(loc, 'solution')
-		output:      locale.ui_string(loc, 'output')
-		resize:      locale.ui_string(loc, 'resize_panes')
-		prev:        locale.ui_string(loc, 'previous')
-		next:        locale.ui_string(loc, 'next')
-		run_program: locale.ui_string(loc, 'run_program')
-		next_page:   locale.ui_string(loc, 'next_page')
-		prev_page:   locale.ui_string(loc, 'prev_page')
-		toggle_help: locale.ui_string(loc, 'toggle_help')
-		move_panes:  locale.ui_string(loc, 'move_panes')
-		not_found:   locale.ui_string(loc, 'not_found_title')
-	}
-}
-
-// counter_text renders the page counter for a locale.
-//
-// The catalogue stores `${number} / ${total}` so a translator can reorder it,
-// which is why Persian can say "۱ از ۵" rather than "1 / 5". The placeholders are
-// substituted rather than interpolated because V would have eaten a literal
-// `${` when the catalogue was compiled, so the dollar sign is put back here.
-fn counter_text(loc string, number int, total int) string {
-	mut s := locale.ui_string(loc, 'page_of')
-	s = s.replace('$' + '{number}', number.str())
-	s = s.replace('$' + '{total}', total.str())
-	return s
+	return render_base(mut ctx, loc, title, toc, path, veb_content, page_view.ui)
 }
 
 // render_base fills in everything base.html needs and returns it.
@@ -345,12 +217,11 @@ fn counter_text(loc string, number int, total int) string {
 // than as a map it indexes, because that is what the veb template compiler in
 // this V version is reliable at. The whole catalogue still goes to the browser
 // as a JSON island, since app.js needs the strings it builds at runtime.
-fn render_base(mut ctx Context, loc string, title string, toc string, path string, veb_content string) veb.Result {
+fn render_base(mut ctx Context, loc string, title string, toc string, path string, veb_content string, u UiStrings) veb.Result {
 	lang := loc
 	dir := locale.dir(loc)
 	ui := locale.ui_map(loc)
 	locales := locale_choices(loc, path)
-	u := ui_for(loc)
 	ui_site := u.site
 	ui_toc := u.toc
 	ui_theme := u.theme
@@ -406,5 +277,5 @@ pub fn (mut ctx Context) not_found() veb.Result {
 	title := 'Not found - A Tour of V'
 	toc := ''
 	veb_content := $tmpl('templates/not_found.html')
-	return render_base(mut ctx, locale.default_locale, title, toc, '', veb_content)
+	return render_base(mut ctx, locale.default_locale, title, toc, '', veb_content, ui_for(locale.default_locale))
 }

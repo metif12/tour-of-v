@@ -426,9 +426,11 @@
 			revealOutput()
 
 			var file = lesson.current()
+			var stdinEl = document.getElementById('stdin')
 			post('/api/run', {
 				code: lesson.editor.getValue(),
-				filename: file.name
+				filename: file.name,
+				stdin: stdinEl ? stdinEl.value : ''
 			}).then(function (res) {
 				running = false
 				if (res.error) {

@@ -1,5 +1,6 @@
 module main
 
+import json2
 import strings
 import tour
 import content
@@ -182,4 +183,140 @@ pub fn embed_json(raw string) string {
 		}
 	}
 	return sb.str()
+}
+
+// UiStrings is the interface text one request needs, already resolved for a
+// locale.
+//
+// It is a struct rather than a map because veb resolves a template variable
+// from the enclosing function, so the names have to be spelled out somewhere.
+// One struct with one constructor keeps the page view and the shared chrome
+// from drifting into showing two different languages.
+pub struct UiStrings {
+pub mut:
+	site        string
+	toc         string
+	theme       string
+	help        string
+	help_close  string
+	language    string
+	run         string
+	format      string
+	reset       string
+	solution    string
+	output      string
+	resize      string
+	prev        string
+	next        string
+	run_program string
+	next_page   string
+	prev_page   string
+	toggle_help string
+	move_panes  string
+	not_found   string
+}
+
+// ui_for resolves the interface catalogue for a locale.
+pub fn ui_for(loc string) UiStrings {
+	return UiStrings{
+		site:        locale.ui_string(loc, 'site_title')
+		toc:         locale.ui_string(loc, 'toc')
+		theme:       locale.ui_string(loc, 'toggle_theme')
+		help:        locale.ui_string(loc, 'help')
+		help_close:  locale.ui_string(loc, 'help_close')
+		language:    locale.ui_string(loc, 'language')
+		run:         locale.ui_string(loc, 'run')
+		format:      locale.ui_string(loc, 'format')
+		reset:       locale.ui_string(loc, 'reset')
+		solution:    locale.ui_string(loc, 'solution')
+		output:      locale.ui_string(loc, 'output')
+		resize:      locale.ui_string(loc, 'resize_panes')
+		prev:        locale.ui_string(loc, 'previous')
+		next:        locale.ui_string(loc, 'next')
+		run_program: locale.ui_string(loc, 'run_program')
+		next_page:   locale.ui_string(loc, 'next_page')
+		prev_page:   locale.ui_string(loc, 'prev_page')
+		toggle_help: locale.ui_string(loc, 'toggle_help')
+		move_panes:  locale.ui_string(loc, 'move_panes')
+		not_found:   locale.ui_string(loc, 'not_found_title')
+	}
+}
+
+// counter_text renders the page counter for a locale.
+//
+// The catalogue stores `${number} / ${total}` so a translator can reorder it,
+// which is why Persian can say "۱ از ۵" rather than "1 / 5". The placeholders are
+// substituted rather than interpolated because V would have eaten a literal
+// `${` when the catalogue was compiled, so the dollar sign is put back here.
+fn counter_text(loc string, number int, total int) string {
+	mut s := locale.ui_string(loc, 'page_of')
+	s = s.replace('$' + '{number}', number.str())
+	s = s.replace('$' + '{total}', total.str())
+	return s
+}
+
+// PageView is everything the lesson page template needs, already resolved for
+// a locale.
+pub struct PageView {
+pub:
+	page_data      PageData
+	page_json      string
+	has_code       bool
+	has_solution   bool
+	has_files_tabs bool
+	has_tools      bool
+	has_format     bool
+	has_stdin      bool
+	has_prev       bool
+	has_next       bool
+	prev_page      ViewLink
+	next_page      ViewLink
+	counter        string
+	lang_prefix    string
+	ui             UiStrings
+}
+
+// build_page_view resolves a lesson page and prepares everything the template
+// needs.
+pub fn build_page_view(t &tour.Tour, loc string, slug string, number int) !PageView {
+	ref := t.resolve(slug, number) or { return error('not found') }
+
+	heading := page_title(loc, ref.lesson.slug, ref.number, ref.page.title)
+	prose := page_body(loc, ref.lesson.slug, ref.number, ref.page.body)
+
+	example := ref.page.code or { content.Example{} }
+	page_data := PageData{
+		module_id: ref.module_id
+		lesson:    ref.lesson.slug
+		locale:    loc
+		title:     heading
+		number:    ref.number
+		total:     ref.total
+		body:      prose
+		files:     view_files(example.files)
+		solution:  view_files(example.solution)
+		prev:      link_view(t.prev(ref), loc)
+		next:      link_view(t.next(ref), loc)
+	}
+
+	has_code := page_data.files.len > 0
+	prev_page := link_view(t.prev(ref), loc)
+
+	return PageView{
+		page_data:      page_data
+		page_json:      embed_json(json2.encode(page_data))
+		has_code:       has_code
+		has_solution:   page_data.solution.len > 0
+		has_files_tabs: page_data.files.len > 1
+		has_tools:      has_code
+		has_format:     has_code
+		has_stdin:      false
+		has_prev:       prev_page.slug != ''
+		has_next:       page_data.next.slug != ''
+		prev_page:      prev_page
+		next_page:      page_data.next
+		counter:        counter_text(loc, ref.number, ref.total)
+		lang_prefix:    if loc == locale.default_locale { '' } else { '/' + loc }
+		ui:             ui_for(loc)
+	}
 }

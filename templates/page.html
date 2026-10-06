@@ -1,34 +1,34 @@
 <div class="lesson" id="lesson">
 	<div class="prose-pane" id="prose-pane">
 		<div class="slide-content">
-			@veb.raw(page_data.body)
+			@veb.raw(page_view.page_data.body)
 		</div>
 
-		<nav class="pager" aria-label="@ui_prev">
-			@if has_prev
-				<a class="prev-page" rel="prev" href="@lang_prefix/@prev_page.slug/@prev_page.number"
-					aria-label="@ui_prev">&lt;</a>
-			@else
-				<span class="prev-page disabled">&lt;</span>
-			@end
-			<span class="counter">@counter</span>
-			@if has_next
-				<a class="next-page" rel="next" href="@lang_prefix/@next_page.slug/@next_page.number"
-					aria-label="@ui_next">&gt;</a>
-			@else
-				<span class="next-page disabled">&gt;</span>
-			@end
-		</nav>
+	<nav class="pager" aria-label="@page_view.ui.prev_page">
+		@if page_view.has_prev
+			<a class="prev-page" rel="prev" href="@page_view.lang_prefix/@page_view.prev_page.slug/@page_view.prev_page.number"
+				aria-label="@page_view.ui.prev_page">&lt;</a>
+		@else
+			<span class="prev-page disabled">&lt;</span>
+		@end
+		<span class="counter">@page_view.counter</span>
+		@if page_view.has_next
+			<a class="next-page" rel="next" href="@page_view.lang_prefix/@page_view.next_page.slug/@page_view.next_page.number"
+				aria-label="@page_view.ui.next_page">&gt;</a>
+		@else
+			<span class="next-page disabled">&gt;</span>
+		@end
+	</nav>
 	</div>
 
-	@if has_code
+	@if page_view.has_code
 		<div class="splitter" id="splitter" role="separator" aria-orientation="vertical"
-			tabindex="0" aria-label="@ui_resize"></div>
+			tabindex="0" aria-label="@page_view.ui.resize"></div>
 
 		<div class="code-pane" id="code-pane">
-			@if has_files_tabs
+			@if page_view.has_files_tabs
 				<div class="file-tabs" id="file-tabs">
-					@for f in page_data.files
+					@for f in page_view.page_data.files
 						<a class="file-tab" href="#" data-file="@f.name">@f.name</a>
 					@endfor
 				</div>
@@ -38,17 +38,17 @@
 				<textarea id="editor"></textarea>
 			</div>
 
-			@if has_tools
+			@if page_view.has_tools
 				<div class="file-menu" id="file-menu">
-<a href="#" id="run" class="menu-button icon-button"
-						title="@ui_run (Shift+Enter)" aria-label="@ui_run">
+					<a href="#" id="run" class="menu-button icon-button"
+						title="@page_view.ui.run (Shift+Enter)" aria-label="@page_view.ui.run">
 						<svg viewBox="0 0 16 16" aria-hidden="true" class="icon-play">
 							<path d="M4 2.5v11l9-5.5z" fill="currentColor" />
 						</svg>
 					</a>
-					@if has_format
+					@if page_view.has_format
 						<a href="#" id="format" class="menu-button icon-button"
-							title="@ui_format (Ctrl+Enter)" aria-label="@ui_format">
+							title="@page_view.ui.format (Ctrl+Enter)" aria-label="@page_view.ui.format">
 							<svg viewBox="0 0 16 16" aria-hidden="true">
 								<path d="M2 3h12M2 6.5h8M2 10h12M2 13.5h6" stroke="currentColor"
 									stroke-width="1.6" fill="none" stroke-linecap="round" />
@@ -58,7 +58,7 @@
 						</a>
 					@end
 					<a href="#" id="reset" class="menu-button icon-button"
-						title="@ui_reset" aria-label="@ui_reset">
+						title="@page_view.ui.reset" aria-label="@page_view.ui.reset">
 						<svg viewBox="0 0 16 16" aria-hidden="true">
 							<path d="M13 8a5 5 0 1 1-1.6-3.7" stroke="currentColor" stroke-width="1.6"
 								fill="none" stroke-linecap="round" />
@@ -66,9 +66,9 @@
 								stroke-linecap="round" stroke-linejoin="round" />
 						</svg>
 					</a>
-					@if has_solution
+					@if page_view.has_solution
 						<a href="#" id="solution" class="menu-button icon-button"
-							title="@ui_solution" aria-label="@ui_solution">
+							title="@page_view.ui.solution" aria-label="@page_view.ui.solution">
 							<svg viewBox="0 0 16 16" aria-hidden="true">
 								<path d="M6.5 3.2a2 2 0 0 1 3 0l.4.5h1.3a1.5 1.5 0 0 1 1.5 1.5v6.3a1.5 1.5 0 0 1-1.5 1.5H4.8a1.5 1.5 0 0 1-1.5-1.5V5.2A1.5 1.5 0 0 1 4.8 3.7h1.3z"
 									stroke="currentColor" stroke-width="1.4" fill="none"
@@ -81,17 +81,15 @@
 
 			<div class="io-panel" id="io-panel">
 				<div class="io-tabs">
-@if has_stdin
-						<button class="io-tab" id="input-toggle" aria-expanded="false"
-							aria-controls="stdin-panel">
-							<svg class="io-chevron" width="14" height="14" viewBox="0 0 16 16"
-								aria-hidden="true">
-								<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2"
-									fill="none" stroke-linecap="round" stroke-linejoin="round" />
-							</svg>
-							<span>Input</span>
-						</button>
-					@end
+					<button class="io-tab" id="input-toggle" aria-expanded="false"
+						aria-controls="stdin-panel">
+						<svg class="io-chevron" width="14" height="14" viewBox="0 0 16 16"
+							aria-hidden="true">
+							<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2"
+								fill="none" stroke-linecap="round" stroke-linejoin="round" />
+						</svg>
+						<span>Input</span>
+					</button>
 					<button class="io-tab" id="output-toggle" aria-expanded="true"
 						aria-controls="output">
 						<svg class="io-chevron" width="14" height="14" viewBox="0 0 16 16"
@@ -99,21 +97,19 @@
 							<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none"
 								stroke-linecap="round" stroke-linejoin="round" />
 						</svg>
-						<span>@ui_output</span>
+						<span>@page_view.ui.output</span>
 					</button>
 				</div>
-				@if has_stdin
-					<div class="stdin-panel" id="stdin-panel" hidden>
-						<label class="stdin-label" for="stdin">Standard input, sent to the program when
-							it runs</label>
-						<textarea id="stdin" spellcheck="false"
-							placeholder="Anything the program reads with os.get_line or os.input"></textarea>
-					</div>
-				@end
+				<div class="stdin-panel" id="stdin-panel" hidden>
+					<label class="stdin-label" for="stdin">Standard input, sent to the program when
+						it runs</label>
+					<textarea id="stdin" spellcheck="false"
+						placeholder="Anything the program reads with os.get_line or os.input"></textarea>
+				</div>
 				<div class="output" id="output"></div>
 			</div>
 		</div>
 	@end
 </div>
 
-<script type="application/json" id="page-data">@veb.raw(page_json)</script>
+<script type="application/json" id="page-data">@veb.raw(page_view.page_json)</script>
