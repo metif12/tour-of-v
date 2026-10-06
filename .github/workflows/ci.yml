@@ -19,9 +19,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: vlang/setup-v@v1
-        with:
-          version: '0.5.2'
+      - name: Install V
+        run: |
+          curl -L https://github.com/vlang/v/releases/download/0.5.2/v_linux.zip -o /tmp/v.zip
+          unzip -o /tmp/v.zip -d /tmp/vlang
+          sudo mv /tmp/vlang/v /usr/local/bin/v
+          v version
 
       # `v fmt -l` lists files that are not formatted. It should print nothing,
       # so the test is that its output is empty. Redirecting rather than using
