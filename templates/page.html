@@ -81,17 +81,15 @@
 
 			<div class="io-panel" id="io-panel">
 				<div class="io-tabs">
-					@if page_view.has_stdin
-						<button class="io-tab" id="input-toggle" aria-expanded="false"
-							aria-controls="stdin-panel">
-							<svg class="io-chevron" width="14" height="14" viewBox="0 0 16 16"
-								aria-hidden="true">
-								<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2"
-									fill="none" stroke-linecap="round" stroke-linejoin="round" />
-							</svg>
-							<span>Input</span>
-						</button>
-					@end
+					<button class="io-tab" id="input-toggle" aria-expanded="false"
+						aria-controls="stdin-panel">
+						<svg class="io-chevron" width="14" height="14" viewBox="0 0 16 16"
+							aria-hidden="true">
+							<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2"
+								fill="none" stroke-linecap="round" stroke-linejoin="round" />
+						</svg>
+						<span>Input</span>
+					</button>
 					<button class="io-tab" id="output-toggle" aria-expanded="true"
 						aria-controls="output">
 						<svg class="io-chevron" width="14" height="14" viewBox="0 0 16 16"
@@ -102,14 +100,12 @@
 						<span>@page_view.ui.output</span>
 					</button>
 				</div>
-				@if page_view.has_stdin
-					<div class="stdin-panel" id="stdin-panel" hidden>
-						<label class="stdin-label" for="stdin">Standard input, sent to the program when
-							it runs</label>
-						<textarea id="stdin" spellcheck="false"
-							placeholder="Anything the program reads with os.get_line or os.input"></textarea>
-					</div>
-				@end
+				<div class="stdin-panel" id="stdin-panel" hidden>
+					<label class="stdin-label" for="stdin">Standard input, sent to the program when
+						it runs</label>
+					<textarea id="stdin" spellcheck="false"
+						placeholder="Anything the program reads with os.get_line or os.input"></textarea>
+				</div>
 				<div class="output" id="output"></div>
 			</div>
 		</div>

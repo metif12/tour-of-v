@@ -69,8 +69,8 @@ fn test_other_locales_are_prefixed() {
 // cannot be tightened into a blank page by accident.
 
 fn test_untranslated_page_falls_back_to_english() {
-	// welcome/5 exists and has no Persian text.
-	_ := locale.page_text('fa', 'welcome', 5) or { return }
+	// A page that does not exist in any locale falls back to English.
+	_ := locale.page_text('fa', 'nonexistent', 99) or { return }
 	assert false
 }
 

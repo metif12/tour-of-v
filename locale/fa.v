@@ -50,6 +50,185 @@ pub const fa = Text{
 <p>هر صفحه نام فایل برنامهٔ خود را در بالای ویرایشگر نشان می‌دهد. در بیشتر صفحه‌ها یک فایل هست، و آن یکی همیشه <code>main.v</code> است.</p>
 <p>متن ویرایشگر برای شما نگه داشته می‌شود، پس اگر صفحه را ببندید و برگردید، کارتان هست.</p>'
 		}
+		'welcome/3':      PageText{
+			title: 'V آفلاین (اختیاری)'
+			body:  "<p>برای استفاده از این تور نیازی به نصب محلی V ندارید، اما داشتن آن ارزش دارد.</p>
+<p>برای نصب V، دستورالعمل‌های <a href='https://vlang.io/install.html'>vlang.io/install</a> را دنبال کنید. در ویندوز، مک و لینوکس نصب‌کننده یک دستور واحد است.</p>
+<p>با نصب V، هر صفحه از این تور را می‌توانید محلی دانلود و اجرا کنید. برنامه را در فایلی به نام <code>main.v</code> کپی کنید و اجرا کنید:</p>
+<pre><code>v run main.v</code></pre>
+<p>برنامه‌های اینجا فقط از کتابخانه استاندارد استفاده می‌کنند، پس همان‌طور نسخه‌هایی که تور برای شما اجرا می‌کند کار می‌کنند.</p>"
+		}
+		'welcome/4':      PageText{
+			title: 'صندوق اجرا'
+			body:  '<p>برنامه‌های شما در یک صندوق اجرا روی سرور اجرا می‌شوند. هر اجرا یک پوشه تازه و خالی می‌گیرد و از بقیه ماشین جدا است.</p>
+<p>برنامه اول کامپایل می‌شود. اگر کامپایل نشود، چیزی اجرا نمی‌شود و پیام کامپایلر نمایش داده می‌شود، با خطای مربوطه در ویرایشگر مشخص شده. آن را اصلاح کنید و دوباره اجرا کنید.</p>'
+		}
+		'welcome/5':      PageText{
+			title: 'آفرین!'
+			body:  "<p>اولین ماژول تور را تمام کردید!</p>
+<p>به <a href='/list'>فهرست ماژول‌ها</a> برگردید تا ببینید چه چیزی را بعداً یاد بگیرید، یا مستقیم با <a href='/basics/1'>پایه‌های زبان</a> ادامه دهید.</p>"
+		}
+		'basics/1':       PageText{
+			title: 'ماژول‌ها'
+			body:  '<h2>ماژول‌ها</h2>'
+		}
+		'basics/2':       PageText{
+			title: 'واردات'
+			body:  '<h2>واردات</h2>'
+		}
+		'basics/3':       PageText{
+			title: 'متغیرها'
+			body:  '<h2>متغیرها</h2>'
+		}
+		'basics/4':       PageText{
+			title: 'متغیرهای تغییرپذیر'
+			body:  '<h2>متغیرهای تغییرپذیر</h2>'
+		}
+		'basics/5':       PageText{
+			title: 'اعلان‌های کوتاه'
+			body:  '<h2>اعلان‌های کوتاه</h2>'
+		}
+		'basics/6':       PageText{
+			title: 'توابع'
+			body:  '<h2>توابع</h2>'
+		}
+		'basics/7':       PageText{
+			title: 'نتایج متعدد'
+			body:  '<h2>نتایج متعدد</h2>'
+		}
+		'basics/8':       PageText{
+			title: 'انواع پایه'
+			body:  '<h2>انواع پایه</h2>'
+		}
+		'basics/9':       PageText{
+			title: 'مقادیر صفر'
+			body:  '<h2>مقادیر صفر</h2>'
+		}
+		'basics/10':      PageText{
+			title: 'ثابت‌ها'
+			body:  '<h2>ثابت‌ها</h2>'
+		}
+		'basics/11':      PageText{
+			title: 'تبدیل نوع'
+			body:  '<h2>تبدیل نوع</h2>'
+		}
+		'basics/12':      PageText{
+			title: 'آفرین!'
+			body:  "<p>این درس را تمام کردید!</p>
+<p>به <a href='/list'>فهرست ماژول‌ها</a> برگردید تا ببینید چه چیزی را بعداً یاد بگیرید، یا با <a href='/controlflow/1'>کنترل جریان</a> ادامه دهید.</p>"
+		}
+		'controlflow/1':  PageText{
+			title: 'حلقه for'
+			body:  '<h2>حلقه for</h2>'
+		}
+		'controlflow/2':  PageText{
+			title: 'for همان while در V است'
+			body:  '<h2>for همان while در V است</h2>'
+		}
+		'controlflow/3':  PageText{
+			title: 'ادامه for'
+			body:  '<h2>ادامه for</h2>'
+		}
+		'controlflow/4':  PageText{
+			title: 'if'
+			body:  '<h2>if</h2>'
+		}
+		'controlflow/5':  PageText{
+			title: 'if با مقدار بازشده'
+			body:  '<h2>if با مقدار بازشده</h2>'
+		}
+		'controlflow/6':  PageText{
+			title: 'match'
+			body:  '<h2>match</h2>'
+		}
+		'controlflow/7':  PageText{
+			title: 'match و انواع جمع'
+			body:  '<h2>match و انواع جمع</h2>'
+		}
+		'controlflow/8':  PageText{
+			title: 'defer'
+			body:  '<h2>defer</h2>'
+		}
+		'controlflow/9':  PageText{
+			title: 'تمرین: حلقه‌ها و توابع'
+			body:  '<h2>تمرین: حلقه‌ها و توابع</h2>'
+		}
+		'controlflow/10': PageText{
+			title: 'آفرین!'
+			body:  "<p>این درس را تمام کردید!</p>
+<p>به <a href='/list'>فهرست ماژول‌ها</a> برگردید تا ببینید چه چیزی را بعداً یاد بگیرید، یا با <a href='/moretypes/1'>انواع بیشتر</a> ادامه دهید.</p>"
+		}
+		'moretypes/1':    PageText{
+			title: 'ساختارها'
+			body:  '<h2>ساختارها</h2>'
+		}
+		'moretypes/2':    PageText{
+			title: 'آرایه‌ها'
+			body:  '<h2>آرایه‌ها</h2>'
+		}
+		'moretypes/3':    PageText{
+			title: 'برش‌ها'
+			body:  '<h2>برش‌ها</h2>'
+		}
+		'moretypes/4':    PageText{
+			title: 'نگاشت‌ها'
+			body:  '<h2>نگاشت‌ها</h2>'
+		}
+		'moretypes/5':    PageText{
+			title: 'رشته‌ها'
+			body:  '<h2>رشته‌ها</h2>'
+		}
+		'moretypes/6':    PageText{
+			title: 'متدها'
+			body:  '<h2>متدها</h2>'
+		}
+		'moretypes/7':    PageText{
+			title: 'تمرین: شمارش کلمات'
+			body:  '<h2>تمرین: شمارش کلمات</h2>'
+		}
+		'moretypes/8':    PageText{
+			title: 'آفرین!'
+			body:  "<p>این درس را تمام کردید!</p>
+<p>به <a href='/list'>فهرست ماژول‌ها</a> برگردید تا ببینید چه چیزی را بعداً یاد بگیرید، یا با <a href='/optionresult/1'>مدیریت فقدان و شکست</a> ادامه دهید.</p>"
+		}
+		'optionresult/1': PageText{
+			title: 'Option'
+			body:  '<h2>Option</h2>'
+		}
+		'optionresult/2': PageText{
+			title: 'Result و خطاها'
+			body:  '<h2>Result و خطاها</h2>'
+		}
+		'optionresult/3': PageText{
+			title: 'تمرین: Options'
+			body:  '<h2>تمرین: Options</h2>'
+		}
+		'optionresult/4': PageText{
+			title: 'آفرین!'
+			body:  "<p>این درس را تمام کردید!</p>
+<p>به <a href='/list'>فهرست ماژول‌ها</a> برگردید تا ببینید چه چیزی را بعداً یاد بگیرید، یا با <a href='/methods/1'>متدها و واسط‌ها</a> ادامه دهید.</p>"
+		}
+		'methods/1':      PageText{
+			title: 'واسط‌ها'
+			body:  '<h2>واسط‌ها</h2>'
+		}
+		'methods/2':      PageText{
+			title: 'جاسازی'
+			body:  '<h2>جاسازی</h2>'
+		}
+		'methods/3':      PageText{
+			title: 'انواع قابل چاپ'
+			body:  '<h2>انواع قابل چاپ</h2>'
+		}
+		'methods/4':      PageText{
+			title: 'تمرین: اشکال'
+			body:  '<h2>تمرین: اشکال</h2>'
+		}
+		'methods/5':      PageText{
+			title: 'آفرین!'
+			body:  "<p>این درس را تمام کردید!</p>
+<p>به <a href='/list'>فهرست ماژول‌ها</a> برگردید تا ببینید چه چیزی را بعداً یاد بگیرید، یا با <a href='/generics/1'>ژنریک‌ها</a> ادامه دهید.</p>"
+		}
 		'generics/1':     PageText{
 			title: 'توابع ژنریک'
 			body:  "<h2>توابع ژنریک</h2>
