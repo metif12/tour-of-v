@@ -72,8 +72,6 @@ pub const fa = Text{
 		'next':             'بعدی'
 		'resize_panes':     'تغییر اندازهٔ ستون‌ها'
 		'page_of':          '\${number} / \${total}'
-		'not_written':      'هنوز نوشته نشده'
-		'not_written_body': 'این درس هنوز نوشته نشده است.'
 		'no_program':       'صندوق اجرا برنامهٔ آزمایشی را در خود نداشت.'
 		'compile_failed':   'برنامه کامپایل نشد.'
 		'could_not_reach':  'ارتباط با سرور برقرار نشد: '

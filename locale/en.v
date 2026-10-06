@@ -50,8 +50,6 @@ pub const en = Text{
 		'next':             'Next'
 		'resize_panes':     'Resize panes'
 		'page_of':          '\${number} / \${total}'
-		'not_written':      'Not written yet'
-		'not_written_body': 'This lesson has not been written yet.'
 		'no_program':       'The sandbox did not contain a test program.'
 		'compile_failed':   'Program did not compile.'
 		'could_not_reach':  'Could not reach the server: '
