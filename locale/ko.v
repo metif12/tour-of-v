@@ -93,7 +93,12 @@ pub const ko = Text{
 			title: '타입 변환'
 			body:  '<h2>타입 변환</h2>'
 		}
-		'basics/12':       PageText{
+		'basics/12':      PageText{
+			title: '축하합니다!'
+			body:  "<p>이 레슨을 완료했습니다!</p>
+<p><a href='/list'>모듈 목록</a>으로 돌아가 다음에 배울 내용을 확인하거나 <a href='/controlflow/1'>제어 흐름</a>으로 계속하세요.</p>"
+		}
+		'basics/13':      PageText{
 			title: '축하합니다!'
 			body:  "<p>이 레슨을 완료했습니다!</p>
 <p><a href='/list'>모듈 목록</a>으로 돌아가 다음에 배울 내용을 확인하거나 <a href='/controlflow/1'>제어 흐름</a>으로 계속하세요.</p>"

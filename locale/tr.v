@@ -98,6 +98,11 @@ pub const tr = Text{
 			body:  "<p>Bu dersi tamamladınız!</p>
 <p>Sıradaki ne öğreneceğinizi görmek için <a href='/list'>modül listesine</a> geri dönün veya <a href='/controlflow/1'>kontrol akışı</a> ile devam edin.</p>"
 		}
+		'basics/13':       PageText{
+			title: 'Tebrikler!'
+			body:  "<p>Bu dersi tamamladınız!</p>
+<p>Sıradaki ne öğreneceğinizi görmek için <a href='/list'>modül listesine</a> geri dönün veya <a href='/controlflow/1'>kontrol akışı</a> ile devam edin.</p>"
+		}
 		'controlflow/1':   PageText{
 			title: 'For'
 			body:  '<h2>For</h2>'

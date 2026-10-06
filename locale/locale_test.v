@@ -102,6 +102,28 @@ fn test_ui_map_always_has_every_english_key() {
 // This walks the real catalogue and fails if a translation names a page that is
 // not there.
 
+fn test_every_locale_has_every_page_translation() {
+	mods := content.modules()
+	mut required := map[string]bool{}
+	for m in mods {
+		for les in m.lessons {
+			for i, _ in les.pages {
+				required['${les.slug}/${i + 1}'] = true
+			}
+		}
+	}
+	assert required.len > 0
+	for l in locale.locales {
+		if l.code == locale.default_locale {
+			continue
+		}
+		text := locale.translations(l.code)
+		for key, _ in required {
+			assert key in text.pages, '${l.code} is missing ${key}'
+		}
+	}
+}
+
 fn test_every_translated_page_key_exists() {
 	mods := content.modules()
 	mut known := map[string]bool{}

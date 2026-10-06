@@ -93,7 +93,12 @@ pub const ja = Text{
 			title: '型変換'
 			body:  '<h2>型変換</h2>'
 		}
-		'basics/12':       PageText{
+		'basics/12':      PageText{
+			title: 'おめでとうございます！'
+			body:  "<p>このレッスンを完了しました！</p>
+<p><a href='/list'>モジュール一覧</a>に戻って次に学ぶことを確認するか、<a href='/controlflow/1'>制御フロー</a>に進んでください。</p>"
+		}
+		'basics/13':      PageText{
 			title: 'おめでとうございます！'
 			body:  "<p>このレッスンを完了しました！</p>
 <p><a href='/list'>モジュール一覧</a>に戻って次に学ぶことを確認するか、<a href='/controlflow/1'>制御フロー</a>に進んでください。</p>"

@@ -98,6 +98,11 @@ pub const id = Text{
 			body:  "<p>Anda telah menyelesaikan pelajaran ini!</p>
 <p>Anda dapat kembali ke <a href='/list'>daftar modul</a> untuk melihat apa yang dipelajari selanjutnya, atau lanjutkan dengan <a href='/controlflow/1'>alur kontrol</a>.</p>"
 		}
+		'basics/13':       PageText{
+			title: 'Selamat!'
+			body:  "<p>Anda telah menyelesaikan pelajaran ini!</p>
+<p>Anda dapat kembali ke <a href='/list'>daftar modul</a> untuk melihat apa yang dipelajari selanjutnya, atau lanjutkan dengan <a href='/controlflow/1'>alur kontrol</a>.</p>"
+		}
 		'controlflow/1':   PageText{
 			title: 'For'
 			body:  '<h2>For</h2>'

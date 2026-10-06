@@ -93,7 +93,12 @@ pub const zh = Text{
 			title: '类型转换'
 			body:  '<h2>类型转换</h2>'
 		}
-		'basics/12':       PageText{
+		'basics/12':      PageText{
+			title: '恭喜！'
+			body:  "<p>你已完成本课程！</p>
+<p>返回<a href='/list'>模块列表</a>查看下一步学习内容，或继续<a href='/controlflow/1'>控制流</a>。</p>"
+		}
+		'basics/13':      PageText{
 			title: '恭喜！'
 			body:  "<p>你已完成本课程！</p>
 <p>返回<a href='/list'>模块列表</a>查看下一步学习内容，或继续<a href='/controlflow/1'>控制流</a>。</p>"

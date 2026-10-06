@@ -98,6 +98,11 @@ pub const ar = Text{
 			body:  "<p>لقد أكملت هذا الدرس!</p>
 <p>يمكنك العودة إلى <a href='/list'>قائمة الوحدات</a> لمعرفة ما تعلمه بعد ذلك، أو المتابعة مع <a href='/controlflow/1'>تدفق التحكم</a>.</p>"
 		}
+		'basics/13':       PageText{
+			title: 'تهانينا!'
+			body:  "<p>لقد أكملت هذا الدرس!</p>
+<p>يمكنك العودة إلى <a href='/list'>قائمة الوحدات</a> لمعرفة ما تعلمه بعد ذلك، أو المتابعة مع <a href='/controlflow/1'>تدفق التحكم</a>.</p>"
+		}
 		'controlflow/1':   PageText{
 			title: 'For'
 			body:  '<h2>For</h2>'

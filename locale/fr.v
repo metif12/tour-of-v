@@ -119,6 +119,11 @@ pub const fr = Text{
 			body:  "<p>Vous avez terminé cette leçon !</p>
 <p>Vous pouvez revenir à la <a href='/list'>liste des modules</a> pour voir quoi apprendre ensuite, ou continuer avec <a href='/controlflow/1'>le flux de contrôle</a>.</p>"
 		}
+		'basics/13':       PageText{
+			title: 'Félicitations !'
+			body:  "<p>Vous avez terminé cette leçon !</p>
+<p>Vous pouvez revenir à la <a href='/list'>liste des modules</a> pour voir quoi apprendre ensuite, ou continuer avec <a href='/controlflow/1'>le flux de contrôle</a>.</p>"
+		}
 		'controlflow/1':   PageText{
 			title: 'For'
 			body:  '<h2>For</h2>
