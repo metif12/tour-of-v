@@ -24,7 +24,7 @@ fn worker(jobs chan int, results chan int, wg &sync.WaitGroup) {
 	// One job per turn, until the channel is closed and empty.
 	for {
 		job := <-jobs or { break }
-		results <- job * 2
+		results <- (job * 2)
 	}
 	wg.done()
 }

@@ -1,6 +1,10 @@
 module main
 
-import json2
+// `x.json2` is the path; the name you use is still `json2`. The V 0.5.2
+// release that compiles programs in the sandbox moved the module, and a bare
+// `import json2` fails there with "cannot import module" even though it works
+// when the tour itself is built.
+import x.json2
 
 // `!T` means a value or a failure.
 fn parse_int(s string) !int {

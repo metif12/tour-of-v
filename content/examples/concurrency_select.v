@@ -36,21 +36,26 @@ fn main() {
 	println('${branch} won with ${winner}, after ${time.now() - start}')
 
 	// A branch can be a send as well as a receive. Here the channel has room, so
-	// the send branch is the one that can run. A receive branch that follows a
-	// send branch needs the `v := <-ch` form: written bare, `<-fast` is read
-	// as a timeout and the compiler complains about a string where it wanted
-	// nanoseconds.
+	// the send branch is the one that can run.
+	//
+	// Keep the two shapes in separate selects. A select holding a send branch
+	// *and* a receive branch crashes the compiler rather than reporting an
+	// error, so pair a send with a timeout instead.
 	out := chan int{cap: 1}
 	mut sent := ''
 	select {
 		out <- 5 {
 			sent = 'the send branch ran'
 		}
-		v := <-fast {
-			sent = 'it took ${v} instead'
+		100 * time.millisecond {
+			sent = 'the buffer was full'
 		}
 	}
-	println('${sent}, and the channel now holds ${<-out}')
+	// The value is in the channel: `len` says so. Do not read it back here.
+	// A value that went in through a send branch comes out as garbage rather
+	// than as what was sent, in this compiler, so the example checks the
+	// length and leaves the value alone.
+	println('${sent}, and the channel holds ${out.len} value(s)')
 
 	// A timeout branch is a duration sitting in a branch position. It is how a
 	// wait stops being unbounded, and only one per select.
@@ -71,8 +76,8 @@ fn main() {
 	mut start3 := time.now()
 	mut took_else := ''
 	select {
-		v := <-empty {
-			took_else = 'took ${v}'
+		_ := <-empty {
+			took_else = 'took a value'
 		}
 		else {
 			took_else = 'nothing was ready'
@@ -84,8 +89,8 @@ fn main() {
 	// ran, false when `else` did. It does not evaluate to the branch's value,
 	// so read the value out in the branch and test the bool separately.
 	if select {
-		v := <-empty {
-			println('a value arrived: ${v}')
+		_ := <-empty {
+			println('a value arrived')
 		}
 		else {
 			println('the else branch ran instead')
@@ -98,11 +103,15 @@ fn main() {
 
 	// Once a channel is closed, receiving from it is always ready, so a closed
 	// channel wins the select every time round.
+	//
+	// Bind the value in the branch. A bare `<-empty {` is read as a timeout
+	// rather than a receive, so the loop waits for a branch that can never run
+	// and the program hangs until the sandbox gives up on it.
 	empty.close()
 	mut spins := 0
 	for spins < 3 {
 		select {
-			<-empty {
+			_ := <-empty {
 				spins++
 			}
 		}

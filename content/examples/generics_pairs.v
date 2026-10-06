@@ -12,9 +12,12 @@ fn apply[T, R](items []T, f fn (T) R) []R {
 
 // Two parameters, and the second one is the callback. The key type never
 // appears in the body: it only has to be a type the map can hold.
+//
+// The loop writes `for _, v in m`. A bare underscore is the way to skip the
+// key. A name like `_k` is refused: "variable name `_k` cannot start with `_`".
 fn total_of[K, V](m map[K]V, value_of fn (V) int) int {
 	mut sum := 0
-	for _k, v in m {
+	for _, v in m {
 		sum += value_of(v)
 	}
 	return sum
@@ -22,7 +25,7 @@ fn total_of[K, V](m map[K]V, value_of fn (V) int) int {
 
 // A generic function returning a generic type is the other shape worth seeing.
 fn first_map[K, V](m map[K]V) ?V {
-	for _k, v in m {
+	for _, v in m {
 		return v
 	}
 	return none

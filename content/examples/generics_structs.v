@@ -37,16 +37,14 @@ mut:
 	second B
 }
 
+// `A` and `B` are unrelated types, so this method can only promise things that
+// are true of every instantiation. Reading both fields is fine; moving a value
+// from one to the other is not, because there is no conversion between `A` and
+// `B` to offer. A method that did that is checked against each instantiation
+// and refused:
+// `cannot assign to `p.first`: expected `string`, not `int``.
 fn (p &Pair[A, B]) describe() string {
 	return '(${p.first}, ${p.second})'
-}
-
-// `A` and `B` being unrelated is also why a method cannot move a value from one
-// field to the other: the compiler has no conversion between them to offer.
-fn (mut p Pair[A, B]) swap() {
-	mut held := p.first
-	p.first = p.second
-	p.second = held
 }
 
 fn main() {
@@ -70,16 +68,14 @@ fn main() {
 
 	// Two parameters, two unrelated types. `describe` only reads, so it is
 	// happy with any pair.
-	mut p := Pair[string, int]{ first: 'age', second: 36 }
-	println('before swap: ${p.describe()}')
+	p := Pair[string, int]{ first: 'age', second: 36 }
+	println('a pair: ${p.describe()}')
 
-	// Two parameters, one type. Here the swap is legal, because both fields
-	// hold the same type and so there is a conversion to be made or skipped.
-	mut coords := Pair[int, int]{ first: 3, second: 4 }
-	coords.swap()
-	println('swapped coords: ${coords.describe()}')
+	// The same struct, instantiated with two other types. One method, three
+	// instantiations, and nothing about it has to change.
+	coords := Pair[int, int]{ first: 3, second: 4 }
+	println('coords: ${coords.describe()}')
 
-	// The same struct, instantiated with two other types again.
-	mut entry := Pair[string, []int]{ first: 'scores', second: [1, 2, 3] }
-	println('before swap: ${entry.describe()}')
+	entry := Pair[string, []int]{ first: 'scores', second: [1, 2, 3] }
+	println('entry: ${entry.describe()}')
 }

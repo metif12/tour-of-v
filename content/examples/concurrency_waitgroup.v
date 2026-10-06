@@ -11,7 +11,9 @@ import time
 // `mut` reference here compiles and then crashes inside the atomic counter on
 // Windows, so the reference without `mut` is the form to use.
 fn worker(wg &sync.WaitGroup, ch chan int, n int) {
-	ch <- n * n
+	// Parenthesised: `ch <- n * n` does not send the product, it tries to
+	// multiply the void the send produced.
+	ch <- (n * n)
 	wg.done()
 }
 
