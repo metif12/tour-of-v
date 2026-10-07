@@ -17,9 +17,12 @@
 # There are two toolchains in this file, and they have different jobs.
 #
 #   V_COMMIT   builds *this tour*. It is built from source rather than taken
-#              from the official vlang image because the tour's templates use
-#              `veb.raw` and loop over the table of contents, and the veb in the
-#              official image (V 0.5.0) has neither. Its output is the single
+#              from the official vlang image because main.v imports json2, which
+#              only exists outside x/ after ee3ef57ffd (vlang/v#27759), so the
+#              0.5.2 release cannot resolve it. It must also stay at or after
+#              afbe25ce30 (vlang/v#29509): vc is fetched unpinned, so v1 already
+#              rejects a parenthesized `if` condition, and an older tree fails
+#              its own bootstrap in vlib/math/bits. Its output is the single
 #              binary at /usr/local/bin/tour; nothing else from it ships.
 #
 #   toolchain  *runs a visitor's code*. This is the official V 0.5.2 release,
@@ -31,7 +34,7 @@
 # submission is a separate decision, made by changing V_RELEASE and
 # V_RELEASE_SHA256 on the `toolchain` stage.
 
-ARG V_COMMIT=a9e7ec2e0e41229a6e1acda45fbda5065527e9e5
+ARG V_COMMIT=facf97c9c24cfa82267e2bf0255bd2158229411a
 
 # --------------------------------------- compiler that builds this tour only
 
@@ -39,7 +42,7 @@ FROM debian:bookworm AS vlang
 
 # An ARG declared before the first FROM is global, and is only automatically in
 # scope for FROM lines. Each stage that uses it has to take it again.
-ARG V_COMMIT=a9e7ec2e0e41229a6e1acda45fbda5065527e9e5
+ARG V_COMMIT=facf97c9c24cfa82267e2bf0255bd2158229411a
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	ca-certificates \
 	git \

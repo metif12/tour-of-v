@@ -722,34 +722,39 @@
 		if (typeof CodeMirror === 'undefined' || !CodeMirror.getMode) {
 			return null
 		}
-		var mode = CodeMirror.getMode({ name: 'vlang' })
+		// The mode goes in the second argument: the first is the editor
+		// configuration, and a spec passed there resolves to the null mode.
+		var mode = CodeMirror.getMode({}, 'vlang')
 		if (!mode || typeof mode.token !== 'function') return null
 
+		// Drive the mode the way the editor does: one stream per line with a
+		// shared state. A stream always starts at 0 and takes no position
+		// argument, so a single stream over the whole text cannot be resumed
+		// partway through.
 		var state = CodeMirror.startState(mode)
 		var out = ''
-		var pos = 0
-		var guard = 0
-
-		while (pos < text.length && guard < 200000) {
-			guard++
-			var stream = new CodeMirror.StringStream(text, pos)
-			// A blank line carries no token, so the mode is told to skip over it.
-			stream.lineStart = 0
-			var style = mode.token(stream, state) || null
-
-			if (stream.current() === '' || stream.pos === pos) {
-				// No progress means the mode cannot tokenise this position, which
-				// happens with an unterminated string. Emit one character and
-				// continue, so a broken block still renders its plain text.
-				out += escapeHTML(text.charAt(pos))
-				pos++
-				continue
+		var lines = text.split('\n')
+		for (var li = 0; li < lines.length; li++) {
+			if (li > 0) out += '\n'
+			var stream = new CodeMirror.StringStream(lines[li])
+			while (!stream.eol()) {
+				var style = mode.token(stream, state) || null
+				var cur = stream.current()
+				if (cur === '') {
+					// No progress means the mode cannot tokenise this
+					// position, which happens with an unterminated string.
+					// Emit one character and continue, so a broken block
+					// still renders its plain text.
+					stream.next()
+					cur = stream.current()
+				}
+				out += style ? '<span class="cm-' + style + '">' +
+					escapeHTML(cur) + '</span>' : escapeHTML(cur)
+				// The stream reports from its last start, so move the start
+				// past what was just emitted.
+				stream.start = stream.pos
 			}
-			out += '<span class="cm-' + style + '">' +
-				escapeHTML(text.slice(pos, stream.pos)) + '</span>'
-			pos = stream.pos
 		}
-		if (pos < text.length) out += escapeHTML(text.slice(pos))
 		return out
 	}
 

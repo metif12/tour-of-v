@@ -114,7 +114,7 @@ pub const de = Text{
 			title: 'Grundtypen'
 			body:  '<h2>Grundtypen</h2>
 <p>Boolesche Werte sind <code>true</code> und <code>false</code>.</p>
-<p>Ganze Zahlen gibt es in den üblichen Größen, geschrieben <code>i8</code> bis <code>i128</code>, und die vorzeichenlosen Größen <code>u8</code> bis <code>u128</code>. <code>int</code> selbst ist auf den meisten Plattformen 32 Bit und <code>long</code> ist 64.</p>'
+<p>Ganze Zahlen gibt es in festen Größen, <code>i8</code>, <code>i16</code>, <code>i32</code>, <code>i64</code> und <code>i128</code>, und die vorzeichenlosen Größen <code>u8</code> bis <code>u128</code>. <code>int</code> selbst ist plattformabhängig: 64 Bit auf 64-Bit-Zielen, 32 auf 32-Bit-Zielen.</p>'
 		}
 		'basics/9':        PageText{
 			title: 'Nullwerte'

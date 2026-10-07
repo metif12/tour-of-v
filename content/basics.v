@@ -221,25 +221,22 @@ tuple:</p>
 <pre><code>fn min_max(values []int) (int, int)</code></pre>
 <p>Callers destructure the result into variables:</p>
 <pre><code>lo, hi := min_max(nums)</code></pre>
-<p>V wraps every single return value in a one element tuple under the hood,
-so a function that returns one value and a function that returns a tuple of
-one value are the same thing.</p>
+<p>The return type simply lists each value, and the caller destructures them
+into variables. A value the caller does not need is ignored with
+<code>_</code>.</p>
 <p>This is the shape you will see for anything that can fail, which is
 covered in a later module.</p>'
 
 const basics_types = '<h2>Basic types</h2>
 <p>Boolean values are <code>true</code> and <code>false</code>.</p>
-<p>Integers come in the usual sizes, written <code>i8</code> through
-<code>i128</code>, and the unsigned sizes <code>u8</code> through
-<code>u128</code>. <code>int</code> itself is 32 bits on most platforms and
-<code>long</code> is 64.</p>
+<p>Integers come in fixed sizes, <code>i8</code>, <code>i16</code>,
+<code>i32</code>, <code>i64</code> and <code>i128</code>, and the unsigned
+sizes <code>u8</code> through <code>u128</code>. <code>int</code> itself is
+the platform width: 64 bits on 64-bit targets, 32 on 32-bit ones, so name
+<code>i32</code> or <code>i64</code> when the width matters.</p>
 <p>Floating point types are <code>f32</code> and <code>f64</code>.</p>
-<p>A <code>byte</code> is an alias for <code>u8</code>, and a
-<code>rune</code> is an alias for <code>u32</code> holding a Unicode code
-point.</p>
-<p>Strings are immutable and are written in single quotes.
-<code>&amp;str</code> is a string literal, which cannot be modified at
-all.</p>'
+<p>A <code>rune</code> holds a Unicode code point.</p>
+<p>Strings are immutable and are written in single quotes.</p>'
 
 const basics_zero = '<h2>Zero values</h2>
 <p>Every type has a <em>zero value</em>, which is what a variable holds
@@ -258,9 +255,10 @@ const basics_constants = '<h2>Constants</h2>
 your program, so it must be a constant expression.</p>
 <p>Constants are written with <code>const</code>, either one at a time or as
 a group in parentheses.</p>
-<p>Unlike a <code>final</code> in some languages, a V <code>const</code>
-cannot be shadowed by a variable of the same name. If a name is constant, it
-is constant everywhere.</p>'
+<p>Unlike a <code>final</code> in some languages, reusing a
+<code>const</code> name for a variable only draws a compiler warning. Treat
+that warning as an error: if a name is constant, it should stay constant
+everywhere.</p>'
 
 const basics_conversions = '<h2>Type conversions</h2>
 <p>V never converts a type implicitly. Going from one to another is always
@@ -276,9 +274,9 @@ that the result may be a zero value if the text did not parse.</p>
 const basics_inference = '<h2>Type inference</h2>
 <p>The type of a <code>:=</code> declaration is inferred from its value, and
 the compiler keeps track of it exactly as if you had written it.</p>
-<p>So these two declarations are identical:</p>
+<p>So these two declarations have the same type:</p>
 <pre><code>a := 10
-a := int(10)</code></pre>
+b := int(10)</code></pre>
 <p>Inference only happens where a type is not written down. Function
 parameters and return types are always explicit, so a function is never a
 mystery about what it takes or gives back.</p>
