@@ -1,6 +1,7 @@
 module tour_test
 
 import content
+import locale
 import tour
 
 fn build() &tour.Tour {
@@ -336,4 +337,66 @@ fn test_main_file_falls_back_to_first() {
 		files: [content.CodeFile{ name: 'only.v', body: 'fn main() {}' }]
 	}
 	assert e.main_file() == 'only.v'
+}
+
+// `lesson_ref` is the front door to a lesson: page 1, not a search.
+fn test_lesson_ref_resolves_the_first_page() {
+	t := build()
+	ref := t.lesson_ref('basics')!
+	assert ref.number == 1
+	assert ref.lesson.slug == 'basics'
+	assert ref.module_id == 'basics'
+	assert ref.total == ref.lesson.pages.len
+}
+
+// An unknown slug is an error rather than page 1 of something else.
+fn test_lesson_ref_errors_on_an_unknown_slug() {
+	t := build()
+	if _ := t.lesson_ref('nope') {
+		assert false, 'expected lesson_ref to fail for nope'
+	}
+}
+
+// Prev and next resolve through the tour rather than trusting the caller's
+// pointers, so a stale or forged reference matches nothing instead of landing
+// somewhere unexpected.
+fn test_prev_and_next_reject_a_forged_reference() {
+	t := build()
+	forged := tour.PageRef{
+		module_id: 'forged'
+		lesson:    content.Lesson{
+			slug:        'nope'
+			title:       'forged'
+			description: 'forged'
+			pages:       []content.Page{}
+		}
+		page:      content.Page{
+			title: 'forged'
+			body:  'forged'
+		}
+		number:    99
+		total:     1
+	}
+	assert !has_prev(t, forged)
+	assert !has_next(t, forged)
+}
+
+// Prose must never name integer types the sandbox compiler cannot build.
+// `i128` and `u128` do not compile under the sandbox compiler, so a learner
+// who copies them out of a lesson gets a broken submission for trusting the
+// text. Only prose is checked here: example programs are skipped on purpose,
+// because code bodies are pinned by the compile half of the suite instead.
+fn test_prose_has_no_uncompilable_int_types() {
+	t := build()
+	for ref in t.pages {
+		assert !ref.page.body.contains('i128'), 'page ${ref.lesson.slug}/${ref.number} mentions i128'
+		assert !ref.page.body.contains('u128'), 'page ${ref.lesson.slug}/${ref.number} mentions u128'
+	}
+	for l in locale.locales {
+		text := locale.translations(l.code)
+		for key, pt in text.pages {
+			assert !pt.body.contains('i128'), '${l.code} page ${key} mentions i128'
+			assert !pt.body.contains('u128'), '${l.code} page ${key} mentions u128'
+		}
+	}
 }

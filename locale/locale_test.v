@@ -182,3 +182,57 @@ fn test_interpolation_placeholders_are_literal() {
 	assert en.contains('\${number}')
 	assert en.contains('\${total}')
 }
+
+// `locale` resolves a code to its registry entry, so the picker and the router
+// agree on what a code means. An unknown code is none rather than a guess.
+fn test_locale_resolves_a_known_code() {
+	l := locale.locale('fa') or {
+		assert false
+		return
+	}
+	assert l.code == 'fa'
+	assert l.native == 'فارسی'
+}
+
+fn test_locale_returns_none_for_an_unknown_code() {
+	_ := locale.locale('zz') or { return }
+	assert false
+}
+
+// `translations` falls back to English for an unknown code, so a bad prefix
+// still renders a full page instead of an empty one.
+fn test_translations_falls_back_to_english_for_an_unknown_code() {
+	assert locale.translations('zz').ui['run'] == locale.en.ui['run']
+}
+
+// A real locale carries translated pages, not just an interface catalogue.
+fn test_translations_returns_pages_for_a_real_locale() {
+	assert locale.translations('fa').pages.len > 0
+}
+
+// Module and lesson titles fall back to English for an unknown locale: the
+// English catalogue value when English has the key (translations('zz') is
+// the English text, so 'basics' resolves there), and the caller's text when
+// no catalogue has it.
+fn test_module_and_lesson_titles_fall_back_to_english() {
+	assert locale.module_title('zz', 'basics', 'Basics') == locale.module_title('en', 'basics', 'Basics')
+	assert locale.lesson_title('zz', 'basics', 'Basics') == locale.lesson_title('en', 'basics', 'Basics')
+	assert locale.module_title('zz', 'nope', 'Basics') == 'Basics'
+	assert locale.lesson_title('zz', 'nope', 'Basics') == 'Basics'
+}
+
+// A translated locale returns its own title. The catalogue keeps both the key
+// and the English text so the key can find the translation.
+fn test_module_and_lesson_titles_return_translations() {
+	assert locale.module_title('fa', 'basics', 'Basics') != ''
+	assert locale.lesson_title('fa', 'basics', 'Basics') != ''
+	assert locale.module_title('fa', 'basics', 'Basics') == locale.translations('fa').modules['basics']
+	assert locale.lesson_title('fa', 'basics', 'Basics') == locale.translations('fa').lessons['basics']
+}
+
+// A slug that names no lesson is none, not a blank page: the caller decides
+// the fallback, and a blank page would hide a broken link.
+fn test_page_text_returns_none_for_a_bogus_slug() {
+	_ := locale.page_text('en', 'nope', 1) or { return }
+	assert false
+}
