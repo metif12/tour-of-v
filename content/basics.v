@@ -230,10 +230,10 @@ covered in a later module.</p>'
 const basics_types = '<h2>Basic types</h2>
 <p>Boolean values are <code>true</code> and <code>false</code>.</p>
 <p>Integers come in fixed sizes, <code>i8</code>, <code>i16</code>,
-<code>i32</code>, <code>i64</code> and <code>i128</code>, and the unsigned
-sizes <code>u8</code> through <code>u128</code>. <code>int</code> itself is
-the platform width: 64 bits on 64-bit targets, 32 on 32-bit ones, so name
-<code>i32</code> or <code>i64</code> when the width matters.</p>
+<code>i32</code> and <code>i64</code>, and the unsigned sizes <code>u8</code>
+through <code>u64</code>. <code>int</code> itself is 32 bits, and
+<code>isize</code> is the platform width, so name <code>i32</code> or
+<code>i64</code> when the width matters.</p>
 <p>Floating point types are <code>f32</code> and <code>f64</code>.</p>
 <p>A <code>rune</code> holds a Unicode code point.</p>
 <p>Strings are immutable and are written in single quotes.</p>'

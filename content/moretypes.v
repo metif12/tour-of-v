@@ -172,9 +172,9 @@ array it is a compile error rather than a surprise at runtime.</p>
 when you need an independent copy:</p>
 <pre><code>mut first := words[..1].clone()</code></pre>
 <p>Note that ranges are <em>exclusive</em>: <code>0 .. n</code> runs
-<code>n</code> times. Ranges inside <code>match</code> are written
-<code>...</code> and are inclusive, which is the one asymmetry worth memorising
-in this lesson.</p>"
+<code>n</code> times, and a <code>for</code> loop only accepts this form.
+Ranges inside <code>match</code> are written <code>...</code> and are
+inclusive on both ends.</p>"
 
 const mt_maps = "<h2>Maps</h2>
 <p>A map holds key and value pairs, and is written as a literal:</p>
