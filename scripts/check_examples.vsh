@@ -1,4 +1,5 @@
 #!/usr/bin/env -S v run
+
 import os
 import json2
 import regex
@@ -14,6 +15,7 @@ const slugs = [
 	'methods',
 	'generics',
 	'concurrency',
+	'tooling',
 ]
 
 fn is_deliberately_broken(body string) bool {
@@ -87,7 +89,8 @@ fn main() {
 				problems << '${path} -> no page-data island'
 				continue
 			}
-			data := json2.decode[map[string]json2.Any]](matches[0]) or {
+			data := json2.decode[map[string]json2.Any{}]
+			(matches[0]) or {
 				problems << '${path} -> invalid JSON'
 				continue
 			}
@@ -104,7 +107,8 @@ fn main() {
 					problems << '${path} ${name.str()} -> ${err}'
 					continue
 				}
-				res := json2.decode[map[string]json2.Any]](res_str) or {
+				res := json2.decode[map[string]json2.Any{}]
+				(res_str) or {
 					problems << '${path} ${name.str()} -> invalid JSON'
 					continue
 				}

@@ -20,7 +20,7 @@ fn main() {
 	_ := f32(0.0)
 	_ := f64(0.0)
 
-	// Byte and rune are aliases for unsigned integers
+	// A rune holds a Unicode code point
 	b := u8(65)
 	r := `A`
 	println(b)

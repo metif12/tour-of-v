@@ -171,8 +171,9 @@ keyword.</p>
 <p>Because an <code>if</code> is an expression that can return a value, the
 pattern above is idiomatic: handle the interesting case and return early,
 then fall through to the ordinary one.</p>
-<p>Use <code>else if</code> for a chain of tests. V will tell you if a branch
-can never be reached.</p>'
+<p>Use <code>else if</code> for a chain of tests. V takes every branch at
+face value, so check the chain yourself: a branch whose test can never be
+true simply never runs, and the compiler will not point it out.</p>'
 
 const cf_if_guard = "<h2>If with an unwrapped value</h2>
 <p>A V function can return a value <em>or</em> an error. The return type is
@@ -202,9 +203,9 @@ which covers more cases than a switch usually does.</p>
 both ends, which is the opposite of the <code>..</code> you use in a
 <code>for</code>:</p>
 <pre><code>1 ... 3 { }</code></pre>
-<p>Match on an enum. Every value of an enum needs an arm, so a new value
-cannot be added without the compiler pointing at every <code>match</code> that
-needs updating.</p>'
+<p>Match on an enum. Every value needs an arm, or the <code>match</code> needs
+an <code>else</code>, so a new value cannot be added without the compiler
+pointing at every <code>match</code> that needs updating.</p>'
 
 const cf_match_sum = '<h2>Match and sum types</h2>
 <p>A <em>sum type</em> is declared with <code>=</code> and a list of

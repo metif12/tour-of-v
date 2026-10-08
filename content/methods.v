@@ -158,11 +158,10 @@ println('it is &#36;{t}')</code></pre>
 <p>This is the one method you will most often write, and it is worth writing
 early: a type that prints itself sensibly makes every later debugging session
 easier.</p>
-<p>The standard library has a convention for the other direction. A type with
-a <code>str</code> method can be used wherever a string is expected by
-conversion, and <code>os</code> functions that take a <code>string</code>
-often accept any type with a <code>str</code> method. The compiler finds the
-method; there is nothing to register.</p>"
+<p>That only affects printing. Anywhere else a <code>string</code> is
+expected, pass one explicitly by calling <code>.str()</code>: a type with a
+<code>str</code> method is still its own type, and the compiler will not
+convert it for you.</p>"
 
 const me_exercise = "<h2>Exercise: Shapes</h2>
 <p>Four things to write.</p>

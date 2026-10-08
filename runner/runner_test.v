@@ -1,5 +1,6 @@
 module runner_test
 
+import os
 import runner
 
 // A colour sequence, built at runtime so this file does not itself contain
@@ -231,4 +232,83 @@ fn test_binary_name_keeps_a_directory_out_of_the_path() {
 fn test_binary_name_leaves_a_name_without_the_v_suffix_alone() {
 	assert runner.binary_name('main') == 'main'
 	assert runner.binary_name('weird') == 'weird'
+}
+
+// Validation runs before anything touches the filesystem, so an empty
+// submission must fail here rather than producing an empty box.
+fn test_validate_rejects_an_empty_submission() {
+	assert runner.validate([]runner.SourceFile{}) == 'No code was provided.'
+}
+
+// Each file becomes a box entry plus compiler work, so the count is capped
+// before the box is even created.
+fn test_validate_rejects_too_many_files() {
+	mut files := []runner.SourceFile{}
+	for i in 0 .. runner.max_source_files + 1 {
+		files << runner.SourceFile{
+			name: 'f${i}.v'
+			body: 'x'
+		}
+	}
+	assert runner.validate(files).contains('Too many files')
+}
+
+// The message names the offender so the caller can tell which of several
+// files was refused without resubmitting them one at a time.
+fn test_validate_rejects_an_illegal_name() {
+	files := [runner.SourceFile{
+		name: 'bad name.v'
+		body: 'fn main() {}'
+	}]
+	assert runner.validate(files) == 'Illegal file name: bad name.v'
+}
+
+// veb sets no request body limit of its own, so the byte total is enforced
+// here before a giant post reaches the disk.
+fn test_validate_rejects_an_oversized_program() {
+	files := [runner.SourceFile{
+		name: 'main.v'
+		body: 'x'.repeat(runner.max_source_bytes + 1)
+	}]
+	assert runner.validate(files).contains('too large')
+}
+
+// A single well-formed file is the normal tour submission, so it must pass
+// with no message at all.
+fn test_validate_accepts_a_single_good_file() {
+	files := [runner.SourceFile{
+		name: 'main.v'
+		body: 'fn main() { println(1) }'
+	}]
+	assert runner.validate(files) == ''
+}
+
+// The environment override lets operators point the boxes at a fixed
+// toolchain without rebuilding, so a set variable must win.
+fn test_toolchain_root_prefers_the_env_override() {
+	old := os.getenv('TOUR_VROOT')
+	defer {
+		if old == '' {
+			os.unsetenv('TOUR_VROOT')
+		} else {
+			os.setenv('TOUR_VROOT', old, true)
+		}
+	}
+	os.setenv('TOUR_VROOT', '/fixed/toolchain/root', true)
+	assert runner.toolchain_root() == '/fixed/toolchain/root'
+}
+
+// Without the override the server must still find its own compiler, so an
+// unset variable falls back to something non-empty rather than failing.
+fn test_toolchain_root_falls_back_without_the_env() {
+	old := os.getenv('TOUR_VROOT')
+	defer {
+		if old == '' {
+			os.unsetenv('TOUR_VROOT')
+		} else {
+			os.setenv('TOUR_VROOT', old, true)
+		}
+	}
+	os.unsetenv('TOUR_VROOT')
+	assert runner.toolchain_root() != ''
 }

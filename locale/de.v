@@ -114,7 +114,7 @@ pub const de = Text{
 			title: 'Grundtypen'
 			body:  '<h2>Grundtypen</h2>
 <p>Boolesche Werte sind <code>true</code> und <code>false</code>.</p>
-<p>Ganze Zahlen gibt es in den üblichen Größen, geschrieben <code>i8</code> bis <code>i128</code>, und die vorzeichenlosen Größen <code>u8</code> bis <code>u128</code>. <code>int</code> selbst ist auf den meisten Plattformen 32 Bit und <code>long</code> ist 64.</p>'
+<p>Ganze Zahlen gibt es in festen Größen, <code>i8</code>, <code>i16</code>, <code>i32</code> und <code>i64</code>, und die vorzeichenlosen Größen <code>u8</code> bis <code>u64</code>. <code>int</code> selbst sind 32 Bit, und <code>isize</code> ist die Plattformbreite.</p>'
 		}
 		'basics/9':        PageText{
 			title: 'Nullwerte'
@@ -234,8 +234,8 @@ pub const de = Text{
 			body:  '<h2>Maps</h2>
 <p>Eine Map enthält Schlüssel-Wert-Paare und wird als Literal geschrieben:</p>
 <pre><code>ages := {
-	'"'"'Ada'"'"': 36
-	'"'"'Alan'"'"': 41
+	\'Ada\': 36
+	\'Alan\': 41
 }</code></pre>'
 		}
 		'moretypes/5':     PageText{
@@ -396,6 +396,44 @@ struct User {
 			body:  "<p>Du hast diese Lektion abgeschlossen, und damit die ganze Tour.</p>
 <p>Alles oben lebt in der Sprache statt in einer Bibliothe, was es sich zu merken lohnt, während du weitergehst: ein Thread, ein Channel und ein Lock sind gewöhnliche V-Deklarationen, die du in derselben Datei wie den Code lesen kannst, dem sie dienen.</p>
 <p>Du kannst zur <a href='/list'>Modulliste</a> zurückkehen, um alles noch einmal zu lesen, oder bei <a href='/welcome/1'>den ersten Schritten</a> neu beginnen.</p>"
+		}
+		'cli/1':          PageText{
+			title: 'Alltagskommandos'
+			body:  "<h2>Alltagskommandos</h2>
+<p>Drei Befehle laufen bei fast jeder Änderung. <code>v fmt -w .</code> formatiert das Projekt, <code>v vet .</code> meldet verdächtige Konstrukte und <code>v test .</code> führt die Tests aus:</p>
+<pre><code>v fmt -w .
+v vet .
+v test .</code></pre>
+<p>Formatiere vor jedem Commit, damit ein Review nie über Layout streitet.</p>
+<p><code>v doc strings</code> zeigt die Dokumentation eines Moduls, <code>v repl</code> öffnet eine interaktive Eingabe und <code>v watch run main.v</code> baut neu und führt erneut aus, sobald sich eine Quelldatei ändert.</p>"
+		}
+		'vpm/1':          PageText{
+			title: 'Pakete'
+			body:  "<h2>Pakete</h2>
+<p>Bibliotheken leben in der Paket-Registry. Durchsuche sie, sieh dir ein Ergebnis an und installiere es:</p>
+<pre><code>v search markdown
+v show markdown
+v install markdown</code></pre>
+<p><code>v list</code> zeigt die Abhängigkeiten des Projekts. <code>v outdated</code> meldet neuere Versionen, <code>v update</code> holt sie und <code>v remove</code> entfernt eine.</p>
+<p>Diese Befehle brauchen das Netz, also laufen sie auf deiner Maschine und nicht in der Sandbox dieser Tour.</p>"
+		}
+		'mcp/1':          PageText{
+			title: 'Model Context Protocol'
+			body:  "<h2>v mcp</h2>
+<p><code>v mcp serve</code> stellt den Compiler selbst einem Coding-Agenten zur Verfügung: Deklarationen, Referenzen und Diagnostik über Standard-Ein- und Ausgabe:</p>
+<pre><code>v mcp serve</code></pre>
+<p><code>v mcp tools</code> listet auf, was verfügbar ist. Mit <code>--http</code> wird stattdessen über HTTP serviert, mit <code>--root</code> werden relative Pfade gegen ein Verzeichnis aufgelöst und mit <code>--read-only</code> werden keine dateischreibenden Tools registriert.</p>
+<p><code>v mcp install</code> verdrahtet den Server mit einem Agenten, <code>v mcp uninstall</code> entfernt ihn wieder. Diese Oberfläche ist neu und braucht daher ein aktuelles V statt des Releases, das diese Sandbox ausführt.</p>"
+		}
+		'skills/1':       PageText{
+			title: 'Skills'
+			body:  "<h2>Skills</h2>
+<p>Skills sind gebündelte Anweisungen, die ein Agent für eine Aufgabe lädt: die Sprachregeln, die Testschleife, die Werkzeugoberfläche:</p>
+<pre><code>v skills list
+v skills add v-tools
+v skills update</code></pre>
+<p>Skills werden in <code>.agents/skills/</code> im Projekt installiert, oder mit <code>--global</code> unter deinem Home-Verzeichnis. <code>v skills path v-tools</code> zeigt, wo eines liegt, und <code>--dry-run</code> meldet, ohne zu schreiben.</p>
+<p>Wie <code>v mcp</code> ist auch das neue Oberfläche: es braucht ein aktuelles V.</p>"
 		}
 	}
 	ui:      {

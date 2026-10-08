@@ -42,10 +42,13 @@
 		'__global', '_likely_', '_unlikely_', 'offsetof', 'isreftype'
 	]
 
-	// Type names, and the type syntax that reads as punctuation.
-	var TYPES = ['bool', 'string', 'rune', 'byte', 'i8', 'i16', 'i32', 'i64',
-		'i128', 'u8', 'u16', 'u32', 'u64', 'u128', 'int', 'long', 'size_t',
-		'isize', 'f32', 'f64', 'voidptr', 'any', 'map', 'array', 'chan',
+	// Type names, and the type syntax that reads as punctuation. Checked
+	// against the primitive types in doc/docs.md and against the compiler:
+	// there is no `long`, `size_t` or `byte`, and `int` is the platform
+	// width rather than a fixed 32 bits.
+	var TYPES = ['bool', 'string', 'rune', 'i8', 'i16', 'i32', 'i64',
+		'i128', 'u8', 'u16', 'u32', 'u64', 'u128', 'int',
+		'isize', 'usize', 'f32', 'f64', 'voidptr', 'any', 'map', 'array', 'chan',
 		'thread', 'ptr']
 
 	// Standard library functions that read like language constructs.
