@@ -281,6 +281,22 @@ pub const ar = Text{
 			body:  "<p>لقد أكملت هذا الدرس، ومعه الجولة بأكملها!</p>
 <p>عد إلى <a href='/list'>قائمة الوحدات</a> لإعادة قراءة أي شيء، أو ابدأ من جديد في <a href='/welcome/1'>البداية</a>.</p>"
 		}
+		'cli/1':          PageText{
+			title: 'أوامر يومية'
+			body:  '<h2>أوامر يومية</h2>'
+		}
+		'vpm/1':          PageText{
+			title: 'حزم'
+			body:  '<h2>حزم</h2>'
+		}
+		'mcp/1':          PageText{
+			title: 'بروتوكول سياق النموذج'
+			body:  '<h2>بروتوكول سياق النموذج</h2>'
+		}
+		'skills/1':       PageText{
+			title: 'مهارات'
+			body:  '<h2>مهارات</h2>'
+		}
 	}
 	ui:      {
 		'site_title':       'جولة في V'

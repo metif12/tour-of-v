@@ -15,6 +15,7 @@ const slugs = [
 	'methods',
 	'generics',
 	'concurrency',
+	'tooling',
 ]
 
 fn is_deliberately_broken(body string) bool {

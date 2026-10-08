@@ -281,6 +281,22 @@ pub const zh = Text{
 			body:  "<p>你已完成本课程，也完成了整个教程！</p>
 <p>返回<a href='/list'>模块列表</a>重新阅读，或从<a href='/welcome/1'>入门</a>重新开始。</p>"
 		}
+		'cli/1':          PageText{
+			title: '日常命令'
+			body:  '<h2>日常命令</h2>'
+		}
+		'vpm/1':          PageText{
+			title: '软件包'
+			body:  '<h2>软件包</h2>'
+		}
+		'mcp/1':          PageText{
+			title: '模型上下文协议'
+			body:  '<h2>模型上下文协议</h2>'
+		}
+		'skills/1':       PageText{
+			title: '技能'
+			body:  '<h2>技能</h2>'
+		}
 	}
 	ui:      {
 		'site_title':       'V 语言教程'

@@ -281,6 +281,22 @@ pub const ko = Text{
 			body:  "<p>이 레슨을 완료했으며, 투어 전체를 마쳤습니다!</p>
 <p><a href='/list'>모듈 목록</a>으로 돌아가 원하는 내용을 다시 읽거나 <a href='/welcome/1'>시작하기</a>에서 다시 시작하세요.</p>"
 		}
+		'cli/1':          PageText{
+			title: '일상 명령'
+			body:  '<h2>일상 명령</h2>'
+		}
+		'vpm/1':          PageText{
+			title: '패키지'
+			body:  '<h2>패키지</h2>'
+		}
+		'mcp/1':          PageText{
+			title: '모델 컨텍스트 프로토콜'
+			body:  '<h2>모델 컨텍스트 프로토콜</h2>'
+		}
+		'skills/1':       PageText{
+			title: '스킬'
+			body:  '<h2>스킬</h2>'
+		}
 	}
 	ui:      {
 		'site_title':       'V 투어'

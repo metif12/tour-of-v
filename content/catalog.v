@@ -15,5 +15,6 @@ pub fn modules() []Module {
 		methods(),
 		generics(),
 		concurrency(),
+		tooling(),
 	]
 }

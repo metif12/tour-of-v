@@ -312,6 +312,22 @@ pub const fr = Text{
 <p>Tout ce qui précède vit dans le langage plutôt que dans une bibliothèque, ce qui vaut la peine d'être rappelé : un thread, un channel et un lock sont des déclarations V ordinaires que vous pouvez lire dans le même fichier que le code qu'elles servent.</p>
 <p>Vous pouvez revenir à la <a href='/list'>liste des modules</a> pour relire quoi que ce soit, ou recommencer à <a href='/welcome/1'>premiers pas</a>.</p>"
 		}
+		'cli/1':          PageText{
+			title: 'Commandes courantes'
+			body:  '<h2>Commandes courantes</h2>'
+		}
+		'vpm/1':          PageText{
+			title: 'Paquets'
+			body:  '<h2>Paquets</h2>'
+		}
+		'mcp/1':          PageText{
+			title: 'Le protocole de contexte du modèle'
+			body:  '<h2>Le protocole de contexte du modèle</h2>'
+		}
+		'skills/1':       PageText{
+			title: 'Compétences'
+			body:  '<h2>Compétences</h2>'
+		}
 	}
 	ui:      {
 		'site_title':       'Un tour de V'

@@ -281,6 +281,22 @@ pub const es = Text{
 			body:  "<p>¡Has terminado esta lección, y con ella todo el tour!</p>
 <p>Vuelve a la <a href='/list'>lista de módulos</a> para releer lo que quieras, o empieza de nuevo en <a href='/welcome/1'>primeros pasos</a>.</p>"
 		}
+		'cli/1':          PageText{
+			title: 'Comandos cotidianos'
+			body:  '<h2>Comandos cotidianos</h2>'
+		}
+		'vpm/1':          PageText{
+			title: 'Paquetes'
+			body:  '<h2>Paquetes</h2>'
+		}
+		'mcp/1':          PageText{
+			title: 'El protocolo de contexto del modelo'
+			body:  '<h2>El protocolo de contexto del modelo</h2>'
+		}
+		'skills/1':       PageText{
+			title: 'Habilidades'
+			body:  '<h2>Habilidades</h2>'
+		}
 	}
 	ui:      {
 		'site_title':       'Un tour por V'

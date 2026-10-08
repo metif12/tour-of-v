@@ -281,6 +281,22 @@ pub const id = Text{
 			body:  "<p>Anda telah menyelesaikan pelajaran ini, dan dengan itu seluruh tur!</p>
 <p>Kembali ke <a href='/list'>daftar modul</a> untuk membaca ulang apa pun, atau mulai lagi dari <a href='/welcome/1'>memulai</a>.</p>"
 		}
+		'cli/1':          PageText{
+			title: 'Perintah sehari-hari'
+			body:  '<h2>Perintah sehari-hari</h2>'
+		}
+		'vpm/1':          PageText{
+			title: 'Paket'
+			body:  '<h2>Paket</h2>'
+		}
+		'mcp/1':          PageText{
+			title: 'Protokol konteks model'
+			body:  '<h2>Protokol konteks model</h2>'
+		}
+		'skills/1':       PageText{
+			title: 'Keterampilan'
+			body:  '<h2>Keterampilan</h2>'
+		}
 	}
 	ui:      {
 		'site_title':       'Tur V'

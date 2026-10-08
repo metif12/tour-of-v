@@ -281,6 +281,22 @@ pub const tr = Text{
 			body:  "<p>Bu dersi tamamladınız ve tüm turu tamamladınız!</p>
 <p>Herhangi bir şeyi yeniden okumak için <a href='/list'>modül listesine</a> geri dönün veya <a href='/welcome/1'>başlangıç</a>'tan yeniden başlayın.</p>"
 		}
+		'cli/1':          PageText{
+			title: 'Günlük komutlar'
+			body:  '<h2>Günlük komutlar</h2>'
+		}
+		'vpm/1':          PageText{
+			title: 'Paketler'
+			body:  '<h2>Paketler</h2>'
+		}
+		'mcp/1':          PageText{
+			title: 'Model bağlam protokolü'
+			body:  '<h2>Model bağlam protokolü</h2>'
+		}
+		'skills/1':       PageText{
+			title: 'Beceriler'
+			body:  '<h2>Beceriler</h2>'
+		}
 	}
 	ui:      {
 		'site_title':       'V Turu'

@@ -281,6 +281,22 @@ pub const ja = Text{
 			body:  "<p>このレッスンを完了し、ツアーも完了しました！</p>
 <p><a href='/list'>モジュール一覧</a>に戻って何でも再読するか、<a href='/welcome/1'>はじめに</a>からやり直してください。</p>"
 		}
+		'cli/1':          PageText{
+			title: '日常的なコマンド'
+			body:  '<h2>日常的なコマンド</h2>'
+		}
+		'vpm/1':          PageText{
+			title: 'パッケージ'
+			body:  '<h2>パッケージ</h2>'
+		}
+		'mcp/1':          PageText{
+			title: 'モデルコンテキストプロトコル'
+			body:  '<h2>モデルコンテキストプロトコル</h2>'
+		}
+		'skills/1':       PageText{
+			title: 'スキル'
+			body:  '<h2>スキル</h2>'
+		}
 	}
 	ui:      {
 		'site_title':       'V ツアー'

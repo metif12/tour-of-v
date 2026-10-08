@@ -9,10 +9,10 @@ fn build() &tour.Tour {
 
 fn test_catalog_has_every_lesson() {
 	mods := content.modules()
-	assert mods.len == 8
+	assert mods.len == 9
 	slugs := mods.map(it.lessons[0].slug)
 	assert slugs == ['welcome', 'basics', 'controlflow', 'moretypes', 'optionresult', 'methods',
-		'generics', 'concurrency']
+		'generics', 'concurrency', 'cli']
 }
 
 fn test_slugs_are_unique() {
